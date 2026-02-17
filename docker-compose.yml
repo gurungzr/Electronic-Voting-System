@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: voting_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - voting_network
+
+  # Flask Application
+  web:
+    build: .
+    container_name: voting_app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - SECRET_KEY=your-super-secret-key-change-in-production
+      - MONGODB_URI=mongodb://mongodb:27017/
+      - DATABASE_NAME=secure_voting_fresh
+      - FLASK_ENV=development
+      - MAIL_SERVER=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USE_TLS=true
+      - MAIL_USE_SSL=false
+      - MAIL_USERNAME=oscargrgz41@gmail.com
+      - MAIL_PASSWORD=batluvjhpnlapwyc
+      - MAIL_DEFAULT_SENDER=oscargrgz41@gmail.com
+    depends_on:
+      - mongodb
+    networks:
+      - voting_network
+    volumes:
+      - .:/app
+
+  # Seed data service (runs once)
+  seed:
+    build: .
+    container_name: voting_seed
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/
+      - DATABASE_NAME=secure_voting_fresh
+    depends_on:
+      - mongodb
+    networks:
+      - voting_network
+    command: python scripts/seed_data.py
+    profiles:
+      - seed
+
+volumes:
+  mongodb_data:
+
+networks:
+  voting_network:
+    driver: bridge
