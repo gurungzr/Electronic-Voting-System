@@ -1,0 +1,736 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Online Voting Nepal{% endblock %}
+{% block head_extra %}<meta data-translate-title="register_title">{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        min-height: 100vh;
+    }
+    .navbar {
+        background: rgba(15, 52, 96, 0.95) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    footer {
+        background: rgba(15, 52, 96, 0.95) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    footer span {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    /* Main container */
+    .register-container {
+        min-height: calc(100vh - 180px);
+        display: flex;
+        align-items: center;
+        padding: 2rem 0;
+    }
+
+    /* Left panel - Branding */
+    .brand-panel {
+        padding: 3rem;
+        color: white;
+        position: relative;
+    }
+    .brand-panel::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, transparent 70%);
+        border-radius: 50%;
+        filter: blur(40px);
+        z-index: 0;
+    }
+    .brand-content {
+        position: relative;
+        z-index: 1;
+    }
+    .brand-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+    }
+    .brand-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #fff 0%, #a7f3d0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .brand-subtitle {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    .step-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .step-list li {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 1.25rem;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.95rem;
+    }
+    .step-number {
+        width: 28px;
+        height: 28px;
+        background: rgba(16, 185, 129, 0.2);
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        color: #6ee7b7;
+        font-weight: 600;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+    .step-text {
+        padding-top: 2px;
+    }
+
+    /* Form panel */
+    .form-panel {
+        padding: 2rem;
+    }
+    .register-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+    .register-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    .register-header h4 {
+        color: white;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .register-header p {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    /* Section headers */
+    .section-title {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .section-title i {
+        color: #6ee7b7;
+    }
+
+    /* Form styling */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    .form-group label {
+        display: block;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 0.4rem;
+    }
+    .input-wrapper {
+        position: relative;
+    }
+    .input-wrapper .form-control {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: white;
+        padding: 0.75rem 1rem 0.75rem 2.75rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    .input-wrapper .form-control:focus {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+        outline: none;
+    }
+    .input-wrapper .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.35);
+    }
+    .input-icon {
+        position: absolute;
+        left: 0.875rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 1rem;
+        transition: color 0.3s ease;
+    }
+    .input-wrapper:focus-within .input-icon {
+        color: #10b981;
+    }
+
+    /* Fix for browser autofill - prevent bright background */
+    .input-wrapper .form-control:-webkit-autofill,
+    .input-wrapper .form-control:-webkit-autofill:hover,
+    .input-wrapper .form-control:-webkit-autofill:focus,
+    .input-wrapper .form-control:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px rgba(30, 41, 59, 1) inset !important;
+        -webkit-text-fill-color: white !important;
+        transition: background-color 5000s ease-in-out 0s;
+        caret-color: white;
+    }
+
+    .form-hint {
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.75rem;
+        margin-top: 0.35rem;
+    }
+
+    /* Validation states */
+    .input-wrapper .form-control.is-valid {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.08);
+    }
+    .input-wrapper .form-control.is-invalid {
+        border-color: #ef4444;
+        background: rgba(239, 68, 68, 0.08);
+    }
+    .input-wrapper .form-control.is-valid:focus {
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+    }
+    .input-wrapper .form-control.is-invalid:focus {
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
+    }
+    .validation-icon {
+        position: absolute;
+        right: 0.875rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1rem;
+        display: none;
+    }
+    .validation-icon.valid {
+        color: #10b981;
+    }
+    .validation-icon.invalid {
+        color: #ef4444;
+    }
+    .form-control.is-valid ~ .validation-icon.valid {
+        display: block;
+    }
+    .form-control.is-invalid ~ .validation-icon.invalid {
+        display: block;
+    }
+    .form-hint.error {
+        color: #fca5a5;
+    }
+    .form-hint.success {
+        color: #6ee7b7;
+    }
+
+    /* Password strength indicator */
+    .password-strength {
+        display: flex;
+        gap: 4px;
+        margin-top: 0.5rem;
+    }
+    .strength-bar {
+        height: 4px;
+        flex: 1;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+        transition: background 0.3s ease;
+    }
+    .strength-bar.weak { background: #ef4444; }
+    .strength-bar.medium { background: #f59e0b; }
+    .strength-bar.strong { background: #10b981; }
+
+    /* Divider */
+    .section-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        margin: 1.25rem 0;
+    }
+
+    /* Submit button */
+    .btn-register {
+        width: 100%;
+        padding: 0.875rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
+    .btn-register:active {
+        transform: translateY(0);
+    }
+
+    /* Login link */
+    .login-divider {
+        display: flex;
+        align-items: center;
+        margin: 1.25rem 0;
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.85rem;
+    }
+    .login-divider::before,
+    .login-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .login-divider::before { margin-right: 1rem; }
+    .login-divider::after { margin-left: 1rem; }
+
+    .login-link {
+        text-align: center;
+    }
+    .btn-login {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.6rem 1.25rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background: transparent;
+    }
+    .btn-login:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Info notice */
+    .info-notice {
+        background: rgba(99, 102, 241, 0.1);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .info-notice i {
+        color: #a5b4fc;
+        font-size: 1.1rem;
+    }
+    .info-notice p {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.8rem;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .brand-panel .brand-content {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    .register-card {
+        animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
+
+    /* Responsive */
+    @media (max-width: 991px) {
+        .brand-panel {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+        .brand-icon {
+            margin: 0 auto 1.5rem;
+        }
+        .brand-title {
+            font-size: 2rem;
+        }
+        .step-list {
+            display: inline-block;
+            text-align: left;
+        }
+    }
+    @media (max-width: 576px) {
+        .register-card {
+            padding: 1.5rem;
+            border-radius: 16px;
+        }
+        .brand-panel::before {
+            width: 200px;
+            height: 200px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="row w-100 g-0 justify-content-center">
+        <!-- Left Panel - Branding -->
+        <div class="col-lg-4 brand-panel d-none d-lg-flex flex-column justify-content-center">
+            <div class="brand-content">
+                <div class="brand-icon">
+                    <i class="bi bi-person-plus-fill"></i>
+                </div>
+                <h1 class="brand-title" data-translate="join_the_vote">Join the Vote</h1>
+                <p class="brand-subtitle" data-translate="register_brand_subtitle">
+                    Register to participate in secure, transparent elections. Your vote shapes the future.
+                </p>
+                <ul class="step-list">
+                    <li>
+                        <span class="step-number">1</span>
+                        <span class="step-text" data-translate="step_1">Enter your citizenship details</span>
+                    </li>
+                    <li>
+                        <span class="step-number">2</span>
+                        <span class="step-text" data-translate="step_2">Verify against citizen database</span>
+                    </li>
+                    <li>
+                        <span class="step-number">3</span>
+                        <span class="step-text" data-translate="step_3">Create secure password</span>
+                    </li>
+                    <li>
+                        <span class="step-number">4</span>
+                        <span class="step-text" data-translate="step_4">Receive your unique Voter ID</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Right Panel - Registration Form -->
+        <div class="col-lg-5 col-md-8 col-11 form-panel">
+            <div class="register-card">
+                <div class="register-header">
+                    <h4><i class="bi bi-person-plus me-2"></i><span data-translate="voter_registration">Voter Registration</span></h4>
+                    <p data-translate="create_account_to_vote">Create your account to start voting</p>
+                </div>
+
+                <div class="info-notice">
+                    <i class="bi bi-info-circle"></i>
+                    <p data-translate="info_verification_notice">Your information will be verified against the citizen database before registration.</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.register') }}" id="registerForm" autocomplete="on">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="section-title">
+                        <i class="bi bi-person"></i>
+                        <span data-translate="personal_information">Personal Information</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="citizenship_number" data-translate="citizenship_number">Citizenship Number</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-card-text input-icon"></i>
+                            <input type="text" class="form-control" id="citizenship_number"
+                                   name="citizenship_number" placeholder="CTZ12345678" data-translate-placeholder="citizenship_placeholder"
+                                   required minlength="8" maxlength="15" autocomplete="on">
+                            <i class="bi bi-check-circle-fill validation-icon valid"></i>
+                            <i class="bi bi-x-circle-fill validation-icon invalid"></i>
+                        </div>
+                        <div class="form-hint" id="citizenship_hint" data-translate="citizenship_hint">8-15 alphanumeric characters</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="full_name" data-translate="full_name">Full Name (as per records)</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-person input-icon"></i>
+                            <input type="text" class="form-control" id="full_name" name="full_name"
+                                   placeholder="Enter your full name" data-translate-placeholder="full_name_placeholder" required autocomplete="name">
+                            <i class="bi bi-check-circle-fill validation-icon valid"></i>
+                            <i class="bi bi-x-circle-fill validation-icon invalid"></i>
+                        </div>
+                        <div class="form-hint" id="name_hint"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date_of_birth" data-translate="date_of_birth">Date of Birth</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-calendar input-icon"></i>
+                            <input type="date" class="form-control" id="date_of_birth"
+                                   name="date_of_birth" required autocomplete="bday">
+                            <i class="bi bi-check-circle-fill validation-icon valid"></i>
+                            <i class="bi bi-x-circle-fill validation-icon invalid"></i>
+                        </div>
+                        <div class="form-hint" id="dob_hint" data-translate="dob_hint">You must be at least 18 years old</div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <div class="section-title">
+                        <i class="bi bi-shield-lock"></i>
+                        <span data-translate="create_password">Create Password</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" data-translate="password">Password</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-lock input-icon"></i>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="Create a strong password" data-translate-placeholder="password_create_placeholder" required minlength="8" autocomplete="new-password">
+                            <i class="bi bi-check-circle-fill validation-icon valid"></i>
+                            <i class="bi bi-x-circle-fill validation-icon invalid"></i>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-bar" id="str1"></div>
+                            <div class="strength-bar" id="str2"></div>
+                            <div class="strength-bar" id="str3"></div>
+                            <div class="strength-bar" id="str4"></div>
+                        </div>
+                        <div class="form-hint" id="password_hint" data-translate="password_hint">Min 8 chars with uppercase, lowercase, number & special character</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm_password" data-translate="confirm_password">Confirm Password</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-lock-fill input-icon"></i>
+                            <input type="password" class="form-control" id="confirm_password"
+                                   name="confirm_password" placeholder="Confirm your password" data-translate-placeholder="confirm_password_placeholder" required autocomplete="new-password">
+                            <i class="bi bi-check-circle-fill validation-icon valid"></i>
+                            <i class="bi bi-x-circle-fill validation-icon invalid"></i>
+                        </div>
+                        <div class="form-hint" id="confirm_hint"></div>
+                    </div>
+
+                    <button type="submit" class="btn-register mt-3">
+                        <i class="bi bi-person-check me-2"></i><span data-translate="create_account">Create Account</span>
+                    </button>
+                </form>
+
+                <div class="login-divider" data-translate="already_registered">Already registered?</div>
+
+                <div class="login-link">
+                    <a href="{{ url_for('auth.login') }}" class="btn-login">
+                        <i class="bi bi-box-arrow-in-right me-2"></i><span data-translate="login_to_vote">Login to Vote</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registerForm');
+    const citizenship = document.getElementById('citizenship_number');
+    const fullName = document.getElementById('full_name');
+    const dob = document.getElementById('date_of_birth');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+
+    // Helper function to get translated text
+    function t(key) {
+        return typeof translator !== 'undefined' ? translator.getTranslation(key) : key;
+    }
+
+    // Validation functions
+    function validateCitizenship(value) {
+        const regex = /^[A-Za-z0-9]{8,15}$/;
+        return regex.test(value);
+    }
+
+    function validateName(value) {
+        const regex = /^[A-Za-z\s\-']{2,100}$/;
+        return regex.test(value.trim());
+    }
+
+    function validateAge(dateStr) {
+        if (!dateStr) return false;
+        const birthDate = new Date(dateStr);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age >= 18;
+    }
+
+    function validatePassword(value) {
+        const hasMinLength = value.length >= 8;
+        const hasUppercase = /[A-Z]/.test(value);
+        const hasLowercase = /[a-z]/.test(value);
+        const hasNumber = /\d/.test(value);
+        const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+        return { hasMinLength, hasUppercase, hasLowercase, hasNumber, hasSpecial };
+    }
+
+    function setValidState(input, isValid, hintEl, message) {
+        input.classList.remove('is-valid', 'is-invalid');
+        if (input.value.trim() === '') {
+            hintEl.className = 'form-hint';
+            hintEl.textContent = message || '';
+            return;
+        }
+        if (isValid) {
+            input.classList.add('is-valid');
+            hintEl.className = 'form-hint success';
+        } else {
+            input.classList.add('is-invalid');
+            hintEl.className = 'form-hint error';
+        }
+    }
+
+    // Citizenship validation
+    citizenship.addEventListener('input', function() {
+        const isValid = validateCitizenship(this.value);
+        const hint = document.getElementById('citizenship_hint');
+        setValidState(this, isValid, hint);
+        hint.textContent = isValid ? t('citizenship_valid') : t('citizenship_invalid');
+    });
+
+    // Name validation
+    fullName.addEventListener('input', function() {
+        const isValid = validateName(this.value);
+        const hint = document.getElementById('name_hint');
+        setValidState(this, isValid, hint);
+        hint.textContent = isValid ? '' : t('name_invalid');
+    });
+
+    // Date of birth validation
+    dob.addEventListener('change', function() {
+        const isValid = validateAge(this.value);
+        const hint = document.getElementById('dob_hint');
+        setValidState(this, isValid, hint);
+        hint.textContent = isValid ? t('age_verified') : t('age_invalid');
+    });
+
+    // Password validation with strength indicator
+    password.addEventListener('input', function() {
+        const checks = validatePassword(this.value);
+        const strength = Object.values(checks).filter(Boolean).length;
+        const hint = document.getElementById('password_hint');
+
+        // Update strength bars
+        const bars = ['str1', 'str2', 'str3', 'str4'];
+        bars.forEach((id, i) => {
+            const bar = document.getElementById(id);
+            bar.className = 'strength-bar';
+            if (this.value.length > 0) {
+                if (i < strength) {
+                    if (strength <= 2) bar.classList.add('weak');
+                    else if (strength <= 3) bar.classList.add('medium');
+                    else bar.classList.add('strong');
+                }
+            }
+        });
+
+        const isValid = strength === 5;
+        setValidState(this, isValid, hint);
+
+        if (this.value.length === 0) {
+            hint.textContent = t('password_hint');
+        } else if (!checks.hasMinLength) {
+            hint.textContent = t('password_min_length');
+        } else if (!checks.hasUppercase) {
+            hint.textContent = t('password_need_uppercase');
+        } else if (!checks.hasLowercase) {
+            hint.textContent = t('password_need_lowercase');
+        } else if (!checks.hasNumber) {
+            hint.textContent = t('password_need_number');
+        } else if (!checks.hasSpecial) {
+            hint.textContent = t('password_need_special');
+        } else {
+            hint.textContent = t('password_strong');
+        }
+
+        // Re-validate confirm password if it has value
+        if (confirmPassword.value) {
+            confirmPassword.dispatchEvent(new Event('input'));
+        }
+    });
+
+    // Confirm password validation
+    confirmPassword.addEventListener('input', function() {
+        const isValid = this.value === password.value && this.value.length > 0;
+        const hint = document.getElementById('confirm_hint');
+        setValidState(this, isValid, hint);
+        hint.textContent = this.value.length === 0 ? '' : (isValid ? t('passwords_match') : t('passwords_no_match'));
+    });
+
+    // Form submit validation
+    form.addEventListener('submit', function(e) {
+        let isFormValid = true;
+
+        // Trigger all validations
+        citizenship.dispatchEvent(new Event('input'));
+        fullName.dispatchEvent(new Event('input'));
+        dob.dispatchEvent(new Event('change'));
+        password.dispatchEvent(new Event('input'));
+        confirmPassword.dispatchEvent(new Event('input'));
+
+        // Check all fields
+        if (!validateCitizenship(citizenship.value)) isFormValid = false;
+        if (!validateName(fullName.value)) isFormValid = false;
+        if (!validateAge(dob.value)) isFormValid = false;
+        const passChecks = validatePassword(password.value);
+        if (Object.values(passChecks).filter(Boolean).length !== 5) isFormValid = false;
+        if (password.value !== confirmPassword.value) isFormValid = false;
+
+        if (!isFormValid) {
+            e.preventDefault();
+            // Scroll to first invalid field
+            const firstInvalid = form.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstInvalid.focus();
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

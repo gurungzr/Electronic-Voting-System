@@ -1,0 +1,634 @@
+/* Secure Voting System - Custom Styles */
+
+/* General Styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+}
+
+main {
+    flex: 1;
+}
+
+/* Card Enhancements */
+.card {
+    border-radius: 10px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+/* Candidate Card Styling */
+.candidate-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.candidate-card:hover {
+    border-color: #0d6efd !important;
+    box-shadow: 0 0 10px rgba(13, 110, 253, 0.2);
+}
+
+.candidate-card .form-check-input:checked + .form-check-label {
+    color: #0d6efd;
+}
+
+.candidate-card:has(.form-check-input:checked) {
+    border-color: #0d6efd !important;
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Form Enhancements */
+.form-control:focus,
+.form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.input-group-text {
+    background-color: #e9ecef;
+}
+
+/* Fix browser autofill styling for dark themed inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px rgba(255, 255, 255, 0.05) inset !important;
+    -webkit-text-fill-color: white !important;
+    transition: background-color 5000s ease-in-out 0s;
+    caret-color: white;
+}
+
+/* Ensure icons stay visible during autofill */
+.input-wrapper:has(input:-webkit-autofill) .input-icon {
+    color: rgba(255, 255, 255, 0.6) !important;
+    z-index: 10;
+}
+
+/* Button Enhancements */
+.btn {
+    border-radius: 8px;
+    padding: 0.5rem 1.25rem;
+    transition: all 0.2s ease;
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Alert Styling */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+/* Badge Styling */
+.badge {
+    padding: 0.5em 0.75em;
+}
+
+/* Table Enhancements - Only for light-themed pages */
+.table:not(.admin-table):not(.log-table) th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+.table-hover:not(.admin-table) tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Navbar Customization */
+.navbar {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1100;
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+/* Voter Button Styling (matching Admin) */
+.voter-btn {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.5rem 1rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.voter-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.voter-btn .voter-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.voter-btn:hover .voter-icon {
+    transform: scale(1.15);
+}
+
+.voter-btn span {
+    font-weight: 500;
+}
+
+/* Voter Dropdown Styling */
+.voter-dropdown .dropdown-toggle::after {
+    transition: transform 0.3s ease;
+    margin-left: 0.5rem;
+}
+
+.voter-dropdown:hover .dropdown-toggle::after,
+.voter-dropdown.show .dropdown-toggle::after {
+    transform: rotate(180deg);
+}
+
+/* Hover to open dropdown */
+.voter-dropdown:hover .dropdown-menu {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.voter-dropdown-menu {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 0;
+    margin-top: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.25s ease-out;
+    transform-origin: top center;
+    z-index: 1050;
+}
+
+.voter-dropdown:hover .dropdown-menu,
+.voter-dropdown .dropdown-menu.show {
+    animation: dropdownSlide 0.25s ease-out forwards;
+}
+
+@keyframes dropdownSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.voter-dropdown-menu .dropdown-item {
+    padding: 0.6rem 1.25rem;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.voter-dropdown-menu .dropdown-item:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-left-color: #0d6efd;
+    padding-left: 1.5rem;
+}
+
+.voter-dropdown-menu .dropdown-item i {
+    color: #0d6efd;
+    transition: transform 0.2s ease;
+}
+
+.voter-dropdown-menu .dropdown-item:hover i {
+    transform: scale(1.1);
+}
+
+.voter-dropdown-menu .dropdown-divider {
+    margin: 0.3rem 0;
+    border-top-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Admin Button Styling */
+.admin-btn {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.5rem 1rem !important;
+    margin-left: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.admin-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.admin-btn .admin-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.admin-btn:hover .admin-icon {
+    transform: scale(1.15) rotate(-5deg);
+}
+
+.admin-btn span {
+    font-weight: 500;
+}
+
+/* Admin Navbar Links (when logged in) */
+.admin-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.85rem !important;
+    margin: 0 0.25rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.admin-nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white !important;
+}
+
+.admin-nav-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.8) 0%, rgba(153, 27, 27, 0.8) 100%);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+.admin-nav-link:hover .admin-nav-icon {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.admin-nav-icon.create {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.8) 0%, rgba(22, 163, 74, 0.8) 100%);
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+}
+
+.admin-nav-link:hover .admin-nav-icon.create {
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+}
+
+.admin-nav-icon.logout {
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.8) 0%, rgba(75, 85, 99, 0.8) 100%);
+    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
+}
+
+.admin-nav-link:hover .admin-nav-icon.logout {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.8) 0%, rgba(185, 28, 28, 0.8) 100%);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.admin-nav-link span:last-child {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Voter Navbar Links (when logged in) */
+.voter-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.85rem !important;
+    margin: 0 0.2rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.voter-nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white !important;
+}
+
+.voter-nav-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.voter-nav-link:hover .voter-nav-icon {
+    transform: scale(1.1);
+}
+
+/* Dashboard - Teal/Green */
+.voter-nav-icon.dashboard {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+.voter-nav-link:hover .voter-nav-icon.dashboard {
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
+}
+
+/* Elections - Blue */
+.voter-nav-icon.elections {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+.voter-nav-link:hover .voter-nav-icon.elections {
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
+}
+
+/* Verify - Purple */
+.voter-nav-icon.verify {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(124, 58, 237, 0.9) 100%);
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+.voter-nav-link:hover .voter-nav-icon.verify {
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5);
+}
+
+/* User ID Badge */
+.voter-id-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem !important;
+    margin: 0 0.2rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.voter-nav-icon.user {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.9) 0%, rgba(245, 158, 11, 0.9) 100%);
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+}
+
+/* Logout - Gray to Red */
+.voter-nav-icon.logout {
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.8) 0%, rgba(75, 85, 99, 0.8) 100%);
+    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
+}
+.voter-nav-link:hover .voter-nav-icon.logout {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.9) 0%, rgba(185, 28, 28, 0.9) 100%);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+}
+
+.voter-nav-link span:last-child,
+.voter-id-badge span:last-child {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Footer */
+.footer {
+    margin-top: auto;
+}
+
+.footer-content {
+    background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.25rem 0;
+}
+
+.footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.footer-flag {
+    height: 22px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.footer-title {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+}
+
+.footer-badges {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.footer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.4rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.footer-badge:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.footer-badge i {
+    font-size: 0.85rem;
+    color: #10b981;
+}
+
+.footer-copyright {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.8rem;
+}
+
+/* Footer responsive */
+@media (max-width: 768px) {
+    .footer-inner {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .footer-badges {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+/* Progress Bar */
+.progress {
+    border-radius: 10px;
+    height: 20px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+
+/* Confirmation Check Animation */
+@keyframes checkmark {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.bi-check-circle-fill {
+    animation: checkmark 0.5s ease-out;
+}
+
+/* Statistics Cards */
+.card.bg-primary,
+.card.bg-success,
+.card.bg-warning,
+.card.bg-info {
+    border: none;
+}
+
+.card.bg-primary:hover,
+.card.bg-success:hover,
+.card.bg-warning:hover,
+.card.bg-info:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Candidate Entry in Create Election - removed hover background to avoid conflicts with dark theme */
+.candidate-entry {
+    transition: all 0.3s ease;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+
+    .navbar-brand {
+        font-size: 1rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    .display-4 {
+        font-size: 2rem;
+    }
+}
+
+/* Loading State */
+.btn.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn.loading::after {
+    content: '';
+    width: 1rem;
+    height: 1rem;
+    margin-left: 0.5rem;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Vote Success Page */
+.vote-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+/* Election Status Indicators */
+.election-active {
+    border-left: 4px solid #28a745;
+}
+
+.election-upcoming {
+    border-left: 4px solid #17a2b8;
+}
+
+.election-ended {
+    border-left: 4px solid #6c757d;
+}
+
+/* Accessibility Improvements */
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+a:focus,
+button:focus {
+    outline: 2px solid #0d6efd;
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .navbar,
+    .footer,
+    .btn {
+        display: none !important;
+    }
+
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+}

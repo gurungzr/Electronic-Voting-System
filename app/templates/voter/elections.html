@@ -1,0 +1,673 @@
+{% extends "base.html" %}
+
+{% block title %}All Elections - Online Voting Nepal{% endblock %}
+{% block title_translate %}elec_title{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Light Blue Theme - Elections Page */
+    body {
+        background: linear-gradient(180deg, #e8f4f8 0%, #d1e9f0 50%, #b8dce8 100%);
+        min-height: 100vh;
+    }
+
+    /* Keep navbar dark for contrast */
+    .navbar {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%) !important;
+        box-shadow: 0 4px 20px rgba(30, 58, 95, 0.3);
+    }
+
+    /* Page Header */
+    .page-header {
+        padding: 2rem 0 1.5rem;
+    }
+    .page-header h2 {
+        color: #1e3a5f;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 0;
+    }
+    .page-header h2 i {
+        color: #10b981;
+    }
+    .page-header .subtitle {
+        color: #64748b;
+        margin-top: 0.5rem;
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+    .filter-tab {
+        padding: 0.5rem 1.25rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        border: 1px solid rgba(30, 58, 95, 0.15);
+        background: rgba(255, 255, 255, 0.8);
+        color: #475569;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .filter-tab:hover {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: rgba(30, 58, 95, 0.25);
+        color: #1e3a5f;
+    }
+    .filter-tab.active {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Election Cards */
+    .election-card {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 16px;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 12px rgba(30, 58, 95, 0.08), 0 1px 3px rgba(30, 58, 95, 0.06);
+        position: relative;
+    }
+    .election-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #10b981, #3b82f6);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .election-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 40px rgba(30, 58, 95, 0.15), 0 4px 12px rgba(30, 58, 95, 0.1);
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+    .election-card:hover::before {
+        opacity: 1;
+    }
+    .election-card.active {
+        border-left: 4px solid #10b981;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 244, 0.95) 100%);
+    }
+    .election-card.active::before {
+        opacity: 1;
+        background: linear-gradient(90deg, #10b981, #059669);
+    }
+    .election-card.upcoming {
+        border-left: 4px solid #f59e0b;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 251, 235, 0.95) 100%);
+    }
+    .election-card.upcoming::before {
+        opacity: 1;
+        background: linear-gradient(90deg, #f59e0b, #d97706);
+    }
+    .election-card.ended {
+        border-left: 4px solid #94a3b8;
+        opacity: 0.85;
+    }
+
+    .card-status {
+        padding: 0.75rem 1.25rem;
+        background: rgba(30, 58, 95, 0.03);
+        border-bottom: 1px solid rgba(30, 58, 95, 0.06);
+    }
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.85rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .status-badge.active {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    /* Active badge shimmer animation */
+    .status-badge.active {
+        position: relative;
+        overflow: hidden;
+    }
+    .status-badge.active::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        animation: shimmer 2s infinite;
+    }
+    @keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+    .status-badge.upcoming {
+        background: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+    .status-badge.ended {
+        background: rgba(100, 116, 139, 0.1);
+        color: #64748b;
+        border: 1px solid rgba(100, 116, 139, 0.2);
+    }
+
+    .card-content {
+        padding: 1.25rem;
+        flex-grow: 1;
+    }
+    .card-content h5 {
+        color: #1e3a5f;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+    }
+    .card-content .description {
+        color: #546e7a;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+    .election-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+    .election-meta span {
+        color: #64748b;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .election-meta i {
+        color: #94a3b8;
+        width: 16px;
+    }
+
+    .card-action {
+        padding: 1rem 1.25rem;
+        border-top: 1px solid rgba(30, 58, 95, 0.06);
+        background: rgba(30, 58, 95, 0.02);
+    }
+
+    /* Vote Button */
+    .btn-vote {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-vote::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s ease;
+    }
+    .btn-vote:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        color: white;
+    }
+    .btn-vote:hover::before {
+        left: 100%;
+    }
+    .btn-vote i {
+        transition: transform 0.3s ease;
+    }
+    .btn-vote:hover i {
+        transform: translateX(3px);
+    }
+
+    /* Pulse animation for active elections */
+    .election-card.active .btn-vote {
+        animation: pulse-glow 2s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        50% { box-shadow: 0 4px 20px rgba(16, 185, 129, 0.5); }
+    }
+
+    .voted-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: rgba(99, 102, 241, 0.1);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 10px;
+        color: #6366f1;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .status-text {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        text-align: center;
+        margin: 0;
+    }
+
+    /* Empty State */
+    .empty-state {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 20px;
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: 0 4px 24px rgba(30, 58, 95, 0.08);
+    }
+    .empty-state i {
+        font-size: 4rem;
+        color: #cbd5e1;
+        margin-bottom: 1rem;
+    }
+    .empty-state h4 {
+        color: #1e3a5f;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .empty-state p {
+        color: #64748b;
+        margin: 0;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .page-header { animation: fadeInUp 0.5s ease-out; }
+    .election-card { animation: fadeInUp 0.4s ease-out backwards; }
+
+    /* Staggered card animations */
+    .col-md-6:nth-child(1) .election-card { animation-delay: 0.1s; }
+    .col-md-6:nth-child(2) .election-card { animation-delay: 0.15s; }
+    .col-md-6:nth-child(3) .election-card { animation-delay: 0.2s; }
+    .col-md-6:nth-child(4) .election-card { animation-delay: 0.25s; }
+    .col-md-6:nth-child(5) .election-card { animation-delay: 0.3s; }
+    .col-md-6:nth-child(6) .election-card { animation-delay: 0.35s; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .page-header h2 {
+            font-size: 1.5rem;
+        }
+    }
+
+    /* ============================================
+       MINIMAL COMPACT FOOTER
+       ============================================ */
+    .voter-footer {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
+        padding: 0.875rem 0;
+        margin-top: auto;
+    }
+    .footer-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .footer-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .footer-flag {
+        height: 18px;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    }
+    .footer-title {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    .footer-center {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    .footer-link {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: color 0.2s;
+    }
+    .footer-link:hover {
+        color: white;
+    }
+    .footer-link i {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+    .footer-divider {
+        width: 1px;
+        height: 14px;
+        background: rgba(255, 255, 255, 0.2);
+    }
+    .footer-badges {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .footer-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.05);
+    }
+    .footer-badge i {
+        color: #10b981;
+        font-size: 0.7rem;
+    }
+    .footer-copyright {
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.7rem;
+    }
+
+    @media (max-width: 768px) {
+        .footer-inner {
+            flex-wrap: wrap;
+            justify-content: center;
+            text-align: center;
+        }
+        .footer-center { display: none; }
+        .footer-badges { order: 3; width: 100%; justify-content: center; margin-top: 0.5rem; }
+    }
+
+    /* ============================================
+       SECURITY WARNING MODAL
+       ============================================ */
+    .security-modal .modal-content {
+        background: white;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 25px 50px rgba(30, 58, 95, 0.25);
+        overflow: hidden;
+    }
+    .security-modal .modal-header {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        border: none;
+        padding: 1.25rem 1.5rem;
+    }
+    .security-modal .modal-title {
+        color: white;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .security-modal .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        opacity: 0.8;
+    }
+    .security-modal .modal-body {
+        padding: 1.5rem;
+    }
+    .security-modal .warning-intro {
+        color: #475569;
+        font-size: 0.95rem;
+        margin-bottom: 1.25rem;
+    }
+    .security-modal .security-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: rgba(30, 58, 95, 0.03);
+        border-radius: 10px;
+        margin-bottom: 0.5rem;
+    }
+    .security-modal .security-item i {
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+    }
+    .security-modal .security-item.encrypted i { color: #10b981; }
+    .security-modal .security-item.once i { color: #f59e0b; }
+    .security-modal .security-item.permanent i { color: #ef4444; }
+    .security-modal .security-item.receipt i { color: #3b82f6; }
+    .security-modal .security-item span {
+        color: #1e3a5f;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    .security-modal .security-item strong {
+        color: #0f172a;
+    }
+    .security-modal .confirm-notice {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.08) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 10px;
+        padding: 0.875rem;
+        margin-top: 1rem;
+        color: #1e40af;
+        font-size: 0.85rem;
+        text-align: center;
+    }
+    .security-modal .modal-footer {
+        border: none;
+        padding: 1rem 1.5rem 1.5rem;
+        gap: 0.75rem;
+    }
+    .security-modal .btn-cancel {
+        padding: 0.625rem 1.25rem;
+        border: 1px solid rgba(30, 58, 95, 0.2);
+        border-radius: 10px;
+        background: white;
+        color: #475569;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .security-modal .btn-cancel:hover {
+        background: rgba(30, 58, 95, 0.05);
+        color: #1e3a5f;
+    }
+    .security-modal .btn-proceed {
+        padding: 0.625rem 1.5rem;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+    .security-modal .btn-proceed:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-list-check"></i> <span data-translate="elec_all_elections">All Elections</span></h2>
+    <p class="subtitle" data-translate="elec_browse">Browse and participate in available elections</p>
+</div>
+
+{% if elections %}
+<div class="row g-4">
+    {% for election in elections %}
+    <div class="col-md-6 col-lg-4">
+        <div class="election-card {% if election.is_ongoing() %}active{% elif not election.has_started() %}upcoming{% else %}ended{% endif %}">
+            <div class="card-status">
+                {% if election.is_ongoing() %}
+                    <span class="status-badge active"><i class="bi bi-broadcast"></i> <span data-translate="elec_active">Active</span></span>
+                {% elif not election.has_started() %}
+                    <span class="status-badge upcoming"><i class="bi bi-clock"></i> <span data-translate="elec_upcoming">Upcoming</span></span>
+                {% else %}
+                    <span class="status-badge ended"><i class="bi bi-check-circle"></i> <span data-translate="elec_ended">Ended</span></span>
+                {% endif %}
+            </div>
+            <div class="card-content">
+                <h5>{{ election.name }}</h5>
+                <p class="description">{{ election.description[:100] }}{% if election.description|length > 100 %}...{% endif %}</p>
+                <div class="election-meta">
+                    <span><i class="bi bi-calendar-event"></i> <span data-translate="elec_start">Start:</span> {{ election.start_date.strftime('%b %d, %Y %H:%M') }}</span>
+                    <span><i class="bi bi-calendar-check"></i> <span data-translate="elec_end">End:</span> {{ election.end_date.strftime('%b %d, %Y %H:%M') }}</span>
+                    <span><i class="bi bi-people"></i> {{ election.candidates|selectattr('constituency', 'equalto', voter.constituency)|list|length }} <span data-translate="elec_candidates_in_constituency">candidates in your constituency</span></span>
+                </div>
+            </div>
+            <div class="card-action">
+                {% if voter.has_voted_in(election.election_id) %}
+                    <div class="voted-badge">
+                        <i class="bi bi-check2-all"></i> <span data-translate="elec_you_have_voted">You have voted</span>
+                    </div>
+                {% elif election.is_ongoing() %}
+                    <button type="button" class="btn-vote" data-bs-toggle="modal" data-bs-target="#securityWarningModal" data-election-url="{{ url_for('voter.vote', election_id=election.election_id) }}">
+                        <i class="bi bi-box-arrow-in-right"></i> <span data-translate="elec_vote_now">Vote Now</span>
+                    </button>
+                {% elif not election.has_started() %}
+                    <p class="status-text mb-0" data-translate="elec_not_yet_open">Voting not yet open</p>
+                {% else %}
+                    <p class="status-text mb-0" data-translate="elec_voting_ended">Voting has ended</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-inbox"></i>
+    <h4 data-translate="elec_no_elections">No Elections Found</h4>
+    <p data-translate="elec_no_elections_text">There are no elections in the system yet.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block footer %}
+<!-- Security Warning Modal -->
+<div class="modal fade security-modal" id="securityWarningModal" tabindex="-1" aria-labelledby="securityWarningModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="securityWarningModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill"></i> <span data-translate="warn_before_you_vote">Before You Vote</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="warning-intro" data-translate="warn_read_carefully">Please read the following information carefully:</p>
+
+                <div class="security-item encrypted">
+                    <i class="bi bi-shield-lock-fill"></i>
+                    <span><strong data-translate="warn_encrypted_title">Your vote is encrypted & anonymous</strong> — <span data-translate="warn_encrypted_desc">We use military-grade encryption. No one can link your vote to your identity.</span></span>
+                </div>
+
+                <div class="security-item once">
+                    <i class="bi bi-1-circle-fill"></i>
+                    <span><strong data-translate="warn_once_title">You can only vote ONCE</strong> — <span data-translate="warn_once_desc">Each voter is allowed a single vote per election. Choose carefully.</span></span>
+                </div>
+
+                <div class="security-item permanent">
+                    <i class="bi bi-x-circle-fill"></i>
+                    <span><strong data-translate="warn_permanent_title">Votes cannot be changed</strong> — <span data-translate="warn_permanent_desc">Once submitted, your ballot is final and cannot be modified or withdrawn.</span></span>
+                </div>
+
+                <div class="security-item receipt">
+                    <i class="bi bi-receipt"></i>
+                    <span><strong data-translate="warn_receipt_title">You'll receive a receipt</strong> — <span data-translate="warn_receipt_desc">After voting, you'll get a receipt ID to verify your vote was recorded.</span></span>
+                </div>
+
+                <div class="confirm-notice">
+                    <i class="bi bi-info-circle me-1"></i>
+                    <span data-translate="warn_confirm_notice">By proceeding, you confirm that you understand and accept these terms.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" data-bs-dismiss="modal" data-translate="warn_cancel">Cancel</button>
+                <a href="#" class="btn-proceed" id="proceedToVoteBtn">
+                    <span data-translate="warn_proceed">Proceed to Vote</span> <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="voter-footer">
+    <div class="container">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <img src="{{ url_for('static', filename='images/Nepal-Flag.png') }}" alt="Nepal" class="footer-flag">
+                <span class="footer-title" data-translate="site_title">Online Voting Nepal</span>
+            </div>
+            <div class="footer-center">
+                <a href="{{ url_for('verify.verify_receipt') }}" class="footer-link"><i class="bi bi-patch-check"></i> <span data-translate="verify_vote">Verify Vote</span></a>
+                <span class="footer-divider"></span>
+                <span class="footer-link"><i class="bi bi-telephone"></i> <span data-translate="footer_helpline">Helpline: 1166</span></span>
+            </div>
+            <div class="footer-badges">
+                <span class="footer-badge"><i class="bi bi-shield-lock-fill"></i> <span data-translate="encrypted">Encrypted</span></span>
+                <span class="footer-badge"><i class="bi bi-patch-check-fill"></i> <span data-translate="verified">Verified</span></span>
+            </div>
+            <div class="footer-copyright">&copy; {{ now().year if now is defined else "2025" }} ECN</div>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const securityModal = document.getElementById('securityWarningModal');
+    const proceedBtn = document.getElementById('proceedToVoteBtn');
+
+    securityModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const electionUrl = button.getAttribute('data-election-url');
+        proceedBtn.href = electionUrl;
+    });
+});
+</script>
+{% endblock %}

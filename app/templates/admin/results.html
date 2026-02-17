@@ -1,0 +1,551 @@
+{% extends "base.html" %}
+
+{% block title %}Results - {{ results.election.name }} - Online Voting Nepal{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #252540 100%);
+        min-height: 100vh;
+    }
+    .navbar {
+        background: rgba(15, 15, 26, 0.95) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    footer {
+        background: rgba(15, 15, 26, 0.95) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    footer span {
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb { background: transparent; padding: 0; margin: 0; }
+    .breadcrumb-item a { color: #60a5fa; text-decoration: none; }
+    .breadcrumb-item a:hover { color: #93c5fd; }
+    .breadcrumb-item.active { color: rgba(255, 255, 255, 0.6); }
+    .breadcrumb-item + .breadcrumb-item::before { color: rgba(255, 255, 255, 0.3); }
+
+    /* Page header */
+    .page-title { color: white; font-weight: 600; }
+    .page-title i { color: #dc2626; }
+    .text-muted { color: rgba(255, 255, 255, 0.5) !important; }
+    h4.text-muted { color: rgba(255, 255, 255, 0.6) !important; }
+
+    /* Stat cards */
+    .stat-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    .stat-card h2 { color: white; font-weight: 700; margin: 0; }
+    .stat-card p { color: rgba(255, 255, 255, 0.6); margin: 0.5rem 0 0 0; }
+    .stat-card.primary { border-left: 4px solid #3b82f6; }
+    .stat-card.info { border-left: 4px solid #06b6d4; }
+    .stat-card.success { border-left: 4px solid #22c55e; }
+
+    /* Results cards */
+    .results-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    .results-card .card-header {
+        padding: 1.25rem 1.5rem;
+        border: none;
+    }
+    .results-card .card-header.bg-primary {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+    }
+    .results-card .card-header.bg-success {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+    }
+    .results-card .card-header h5 {
+        color: white;
+        margin: 0;
+        font-weight: 600;
+    }
+    .results-card .card-body {
+        padding: 1.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.02) !important;
+    }
+
+    /* Constituency cards */
+    .constituency-result {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .constituency-result .card-header {
+        background: rgba(59, 130, 246, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 1rem;
+    }
+    .constituency-result .card-header h6 {
+        color: white;
+        margin: 0;
+    }
+    .constituency-result .card-header small {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    .constituency-result .card-body {
+        padding: 1.25rem;
+        background: rgba(255, 255, 255, 0.03) !important;
+    }
+    .winner-display {
+        text-align: center;
+        padding: 1rem 0;
+    }
+    .winner-display i.bi-trophy-fill {
+        color: #fbbf24;
+    }
+    .winner-display h5 {
+        color: white;
+        margin: 0.75rem 0 0.25rem 0;
+    }
+    .winner-display .badge {
+        background: rgba(107, 114, 128, 0.3);
+        color: #d1d5db;
+    }
+    .winner-display .text-success {
+        color: #86efac !important;
+    }
+
+    /* Table styling */
+    .results-table {
+        color: rgba(255, 255, 255, 0.8);
+    }
+    .results-table th, .results-table td {
+        border-color: rgba(255, 255, 255, 0.08);
+        padding: 0.75rem;
+    }
+    .results-table thead {
+        background-color: rgba(30, 30, 50, 0.95) !important;
+    }
+    .results-table thead th {
+        background-color: rgba(30, 30, 50, 0.95) !important;
+        color: rgba(255, 255, 255, 0.85) !important;
+        font-weight: 600;
+    }
+    /* Force dark theme on ALL tables */
+    .results-table.table,
+    .table.results-table,
+    table.results-table {
+        --bs-table-bg: transparent !important;
+        --bs-table-color: rgba(255, 255, 255, 0.85) !important;
+        background-color: transparent !important;
+        color: rgba(255, 255, 255, 0.85) !important;
+    }
+    .results-table > tbody > tr,
+    .results-table > tbody > tr > td,
+    .results-table tbody tr,
+    .results-table tbody tr td {
+        background-color: rgba(30, 30, 50, 0.95) !important;
+        color: rgba(255, 255, 255, 0.85) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    /* Winner row styling */
+    .results-table > tbody > tr.winner-row,
+    .results-table > tbody > tr.winner-row > td,
+    .results-table tbody tr.winner-row,
+    .results-table tbody tr.winner-row td {
+        background-color: rgba(34, 197, 94, 0.3) !important;
+        color: #fff !important;
+    }
+
+    /* Party name styling - make it visible */
+    .party-name {
+        color: #fbbf24 !important;
+        font-weight: 500;
+    }
+    .winner-row .party-name {
+        color: #fef08a !important;
+    }
+
+    /* Leading party badge */
+    .leading-badge {
+        background: #15803d !important;
+        color: #fff !important;
+        font-weight: 600;
+    }
+
+    .results-table .text-success { color: #86efac !important; }
+    .results-table .badge { background: rgba(59, 130, 246, 0.3); color: #93c5fd; }
+
+    /* Table footer */
+    .results-table > tfoot,
+    .results-table > tfoot > tr,
+    .results-table > tfoot > tr > th,
+    .results-table tfoot.table-light,
+    .results-table tfoot.table-light tr,
+    .results-table tfoot.table-light th {
+        background-color: rgba(50, 50, 70, 0.95) !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    /* Progress bars */
+    .progress {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+    }
+    .progress-bar {
+        border-radius: 10px;
+    }
+
+    /* List group */
+    .summary-list .list-group-item {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 0.5rem;
+        border-radius: 8px !important;
+    }
+    .summary-list .badge.bg-primary {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #93c5fd;
+    }
+    .summary-list .badge.bg-success {
+        background: rgba(34, 197, 94, 0.2) !important;
+        color: #86efac;
+    }
+
+    /* Summary card */
+    .summary-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+    }
+    .summary-card .card-header {
+        background: rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 1rem 1.25rem;
+    }
+    .summary-card .card-header h5 {
+        color: white;
+        margin: 0;
+    }
+    .summary-card .card-header h5 i {
+        color: #dc2626;
+    }
+    .summary-card .card-body {
+        padding: 1.25rem;
+    }
+    .summary-card h6 {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Buttons */
+    .btn-back {
+        color: rgba(255, 255, 255, 0.7);
+        border-color: rgba(255, 255, 255, 0.2);
+        background: transparent;
+    }
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: white;
+    }
+    .btn-dashboard {
+        color: #60a5fa;
+        border-color: rgba(96, 165, 250, 0.3);
+        background: transparent;
+    }
+    .btn-dashboard:hover {
+        background: rgba(96, 165, 250, 0.1);
+        border-color: #60a5fa;
+        color: #93c5fd;
+    }
+
+    /* Animation */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .stat-card, .results-card, .summary-card {
+        animation: fadeInUp 0.5s ease-out backwards;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.view_election', election_id=results.election.election_id) }}">{{ results.election.name }}</a></li>
+                <li class="breadcrumb-item active">Results</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="page-title"><i class="bi bi-bar-chart me-2"></i>Dual-Ballot Election Results</h2>
+        <h4 class="text-muted">{{ results.election.name }}</h4>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="stat-card primary">
+            <h2>{{ results.pr.total_votes }}</h2>
+            <p>Total Ballots Cast</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card info">
+            <h2>3</h2>
+            <p>FPTP Constituency Seats</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card success">
+            <h2>{{ results.pr.total_seats }}</h2>
+            <p>PR Seats Allocated</p>
+        </div>
+    </div>
+</div>
+
+<!-- FPTP Results Section -->
+<div class="results-card mb-4">
+    <div class="card-header bg-primary">
+        <h5><i class="bi bi-trophy me-2"></i>FPTP Results - Constituency Winners</h5>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">First Past The Post results by constituency. The candidate with the most votes wins the seat.</p>
+
+        <div class="row">
+            {% for constituency, data in results.fptp.constituencies.items() %}
+            <div class="col-md-4 mb-4">
+                <div class="constituency-result h-100">
+                    <div class="card-header">
+                        <h6><i class="bi bi-geo-alt me-2"></i>{{ constituency }}</h6>
+                        <small>Total votes: {{ data.total_votes }}</small>
+                    </div>
+                    <div class="card-body">
+                        {% if data.winner %}
+                        <div class="winner-display mb-3">
+                            <i class="bi bi-trophy-fill display-6"></i>
+                            <h5>{{ data.winner.name }}</h5>
+                            <span class="badge">{{ data.winner.party }}</span>
+                            <div class="mt-2">
+                                <strong class="text-success">{{ data.winner.votes }} votes</strong>
+                                {% if data.total_votes > 0 %}
+                                <span class="text-muted">({{ ((data.winner.votes / data.total_votes) * 100)|round(1) }}%)</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <hr>
+                        {% endif %}
+
+                        <h6 class="text-muted" style="color: rgba(255,255,255,0.6) !important;">All Candidates:</h6>
+                        <table class="table table-sm results-table">
+                            <tbody>
+                                {% for candidate in data.candidates %}
+                                <tr {% if loop.first %}class="winner-row"{% endif %}>
+                                    <td>
+                                        {% if loop.first %}<i class="bi bi-check-circle-fill text-success me-1"></i>{% endif %}
+                                        {{ candidate.name }}
+                                        <br><small class="party-name">{{ candidate.party }}</small>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong>{{ candidate.votes }}</strong>
+                                        {% if data.total_votes > 0 %}
+                                        <br><small>{{ ((candidate.votes / data.total_votes) * 100)|round(1) }}%</small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted">No candidates</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- PR Results Section -->
+<div class="results-card mb-4">
+    <div class="card-header bg-success">
+        <h5><i class="bi bi-building me-2"></i>PR Results - Proportional Representation ({{ results.pr.total_seats }} Seats)</h5>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">Seats allocated using the Largest Remainder method (Hare quota).</p>
+
+        {% if results.pr.parties %}
+        <div class="table-responsive">
+            <table class="table results-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Party</th>
+                        <th>Votes</th>
+                        <th>Vote %</th>
+                        <th>Seats Won</th>
+                        <th>Seat %</th>
+                        <th>Progress</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for party in results.pr.parties %}
+                    <tr {% if loop.first %}class="winner-row"{% endif %}>
+                        <td>
+                            {% if loop.first %}
+                                <i class="bi bi-trophy-fill text-warning"></i>
+                            {% else %}
+                                {{ loop.index }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if party.symbol %}
+                            <i class="{{ party.symbol }} me-2"></i>
+                            {% endif %}
+                            <strong>{{ party.name }}</strong>
+                            {% if loop.first %}
+                                <span class="badge leading-badge ms-2">Leading Party</span>
+                            {% endif %}
+                        </td>
+                        <td><strong>{{ party.votes }}</strong></td>
+                        <td>{{ party.percentage }}%</td>
+                        <td>
+                            <span class="badge bg-primary fs-6">{{ party.seats }}</span>
+                        </td>
+                        <td>
+                            {% if results.pr.total_seats > 0 %}
+                                {{ ((party.seats / results.pr.total_seats) * 100)|round(1) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </td>
+                        <td style="width: 200px;">
+                            <div class="progress" style="height: 20px;">
+                                {% set seat_percentage = ((party.seats / results.pr.total_seats) * 100) if results.pr.total_seats > 0 else 0 %}
+                                <div class="progress-bar bg-primary"
+                                     style="width: {{ seat_percentage }}%;">
+                                    {{ party.seats }}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="table-light">
+                    <tr>
+                        <th colspan="2">Total</th>
+                        <th>{{ results.pr.total_votes }}</th>
+                        <th>100%</th>
+                        <th>{{ results.pr.total_seats }}</th>
+                        <th>100%</th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Visual Chart for PR -->
+        <div class="row mt-4">
+            <div class="col-md-8">
+                <h6><i class="bi bi-pie-chart me-2"></i>Seat Distribution</h6>
+                {% for party in results.pr.parties %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>{% if party.symbol %}<i class="{{ party.symbol }} me-1"></i>{% endif %}{{ party.name }}</span>
+                        <span>{{ party.seats }} seats ({{ party.percentage }}% votes)</span>
+                    </div>
+                    {% set seat_percentage = ((party.seats / results.pr.total_seats) * 100) if results.pr.total_seats > 0 else 0 %}
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar" role="progressbar"
+                             style="width: {{ seat_percentage }}%; background-color: hsl({{ loop.index0 * 60 }}, 70%, 50%);">
+                            {{ seat_percentage|round(1) }}%
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="bi bi-inbox display-4 text-muted"></i>
+            <p class="mt-2 text-muted">No PR votes have been cast in this election.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Summary -->
+<div class="summary-card mb-4">
+    <div class="card-header">
+        <h5><i class="bi bi-clipboard-data me-2"></i>Election Summary</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>FPTP Winners (3 seats)</h6>
+                <ul class="list-group summary-list">
+                    {% for constituency, data in results.fptp.constituencies.items() %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ constituency }}:</strong>
+                            {% if data.winner %}
+                            {{ data.winner.name }} ({{ data.winner.party }})
+                            {% else %}
+                            <span class="text-muted">No winner</span>
+                            {% endif %}
+                        </div>
+                        {% if data.winner %}
+                        <span class="badge bg-primary">{{ data.winner.votes }} votes</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6>PR Seat Leaders (Top 3)</h6>
+                <ul class="list-group summary-list">
+                    {% for party in results.pr.parties[:3] %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ party.name }}
+                        <span class="badge bg-success">{{ party.seats }} seats</span>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-muted">No parties</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions -->
+<div class="row">
+    <div class="col">
+        <a href="{{ url_for('admin.view_election', election_id=results.election.election_id) }}"
+           class="btn btn-back">
+            <i class="bi bi-arrow-left me-2"></i>Back to Election Details
+        </a>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-dashboard">
+            <i class="bi bi-speedometer2 me-2"></i>Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Chain Status - Online Voting Nepal{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #252540 100%);
+        min-height: 100vh;
+    }
+    .navbar {
+        background: rgba(15, 15, 26, 0.95) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    footer {
+        background: rgba(15, 15, 26, 0.95) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    footer span {
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    .page-header {
+        color: white;
+        margin-bottom: 2rem;
+    }
+    .page-header h2 {
+        font-weight: 600;
+        margin: 0;
+    }
+    .page-header h2 i {
+        color: #dc2626;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 1.25rem;
+        transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    .stat-card .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    .stat-card .stat-icon.success { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+    .stat-card .stat-icon.danger { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); }
+    .stat-card .stat-icon.info { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); }
+    .stat-card .stat-icon.warning { background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); }
+    .stat-card .stat-label {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    .stat-card .stat-value {
+        color: white;
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .chain-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    .chain-card .card-header {
+        background: rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 1.25rem 1.5rem;
+    }
+    .chain-card .card-header h5 {
+        color: white;
+        margin: 0;
+        font-weight: 600;
+    }
+    .chain-card .card-body {
+        padding: 1.5rem;
+    }
+
+    .integrity-status {
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+    }
+    .integrity-status.valid {
+        background: rgba(34, 197, 94, 0.15);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .integrity-status.invalid {
+        background: rgba(220, 38, 38, 0.15);
+        border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+    .integrity-status i {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+    }
+    .integrity-status.valid i { color: #22c55e; }
+    .integrity-status.invalid i { color: #dc2626; }
+    .integrity-status h4 {
+        color: white;
+        margin: 0.5rem 0;
+    }
+    .integrity-status p {
+        color: rgba(255, 255, 255, 0.6);
+        margin: 0;
+    }
+
+    .hash-display {
+        font-family: 'Monaco', 'Consolas', monospace;
+        font-size: 0.75rem;
+        color: #fca5a5;
+        background: rgba(220, 38, 38, 0.1);
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        word-break: break-all;
+    }
+
+    .log-table {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.8);
+    }
+    .log-table thead th {
+        background: rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.6);
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        padding: 0.75rem;
+    }
+    .log-table tbody tr {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .log-table tbody td {
+        padding: 0.75rem;
+        vertical-align: middle;
+        border: none;
+        font-size: 0.85rem;
+    }
+    .log-table code {
+        background: rgba(220, 38, 38, 0.15);
+        color: #fca5a5;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+    }
+
+    .btn-back {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2><i class="bi bi-link-45deg me-2"></i>Audit Chain Status</h2>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-back">
+        <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+    </a>
+</div>
+
+<!-- Chain Integrity Status -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="chain-card h-100">
+            <div class="card-header">
+                <h5><i class="bi bi-shield-check me-2"></i>Chain Integrity</h5>
+            </div>
+            <div class="card-body">
+                {% if status.chain_intact %}
+                <div class="integrity-status valid">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <h4>Chain Intact</h4>
+                    <p>All {{ status.verification_details.entries_checked }} entries verified successfully</p>
+                </div>
+                {% else %}
+                <div class="integrity-status invalid">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <h4>Tampering Detected!</h4>
+                    <p>{{ status.verification_details.error }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="chain-card h-100">
+            <div class="card-header">
+                <h5><i class="bi bi-hash me-2"></i>Latest Hash</h5>
+            </div>
+            <div class="card-body">
+                <p style="color: rgba(255,255,255,0.6); margin-bottom: 0.5rem;">Current chain head:</p>
+                <div class="hash-display">{{ status.latest_hash }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+    <div class="col">
+        <div class="stat-card h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon info text-white">
+                    <i class="bi bi-journal-text"></i>
+                </div>
+                <div>
+                    <div class="stat-label">Total Entries</div>
+                    <div class="stat-value">{{ status.total_entries }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="stat-card h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon success text-white">
+                    <i class="bi bi-link"></i>
+                </div>
+                <div>
+                    <div class="stat-label">Chain Entries</div>
+                    <div class="stat-value">{{ status.chain_entries }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="stat-card h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon warning text-white">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div>
+                    <div class="stat-label">Legacy Entries</div>
+                    <div class="stat-value">{{ status.legacy_entries }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="stat-card h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon {% if status.chain_intact %}success{% else %}danger{% endif %} text-white">
+                    <i class="bi bi-patch-check"></i>
+                </div>
+                <div>
+                    <div class="stat-label">Verified</div>
+                    <div class="stat-value">{{ status.verification_details.entries_checked }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Logs with Hashes -->
+<div class="row">
+    <div class="col">
+        <div class="chain-card">
+            <div class="card-header">
+                <h5><i class="bi bi-list-ul me-2"></i>Recent Audit Entries (Hash Chain)</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_logs %}
+                <div class="table-responsive">
+                    <table class="table log-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Event</th>
+                                <th>User</th>
+                                <th>Entry Hash</th>
+                                <th>Previous Hash</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in recent_logs %}
+                            <tr>
+                                <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                <td>{{ log.event_type }}</td>
+                                <td>{{ log.user_id or '-' }}</td>
+                                <td><code>{{ (log.entry_hash or 'N/A')[:16] }}...</code></td>
+                                <td><code>{{ (log.previous_hash or 'N/A')[:16] }}...</code></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4" style="color: rgba(255,255,255,0.5);">
+                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                    <p class="mt-2">No audit logs yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

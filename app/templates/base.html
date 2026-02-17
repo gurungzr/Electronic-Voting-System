@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" data-translate-title="site_title">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Online Voting Nepal{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <!-- Language Toggle Styles -->
+    <style>
+        .lang-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        .lang-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: white;
+            transform: translateY(-1px);
+        }
+        .lang-toggle-btn .lang-flag {
+            font-size: 1rem;
+            line-height: 1;
+        }
+        .lang-toggle-btn .lang-text {
+            font-size: 0.75rem;
+        }
+        @media (max-width: 576px) {
+            .lang-toggle-btn .lang-text { display: none; }
+            .lang-toggle-btn { padding: 0.35rem 0.5rem; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('auth.index') }}">
+                <img src="{{ url_for('static', filename='images/Nepal-Flag.png') }}" alt="Nepal Flag" style="height: 30px; margin-right: 10px;">
+                <span data-translate="site_title">Online Voting Nepal</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_admin %}
+                            <li class="nav-item">
+                                <a class="nav-link admin-nav-link" href="{{ url_for('admin.dashboard') }}">
+                                    <span class="admin-nav-icon"><i class="bi bi-speedometer2"></i></span>
+                                    <span>Dashboard</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link admin-nav-link" href="{{ url_for('admin.create_election') }}">
+                                    <span class="admin-nav-icon create"><i class="bi bi-plus-circle-fill"></i></span>
+                                    <span>Create Election</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link admin-nav-link logout" href="{{ url_for('admin.logout') }}">
+                                    <span class="admin-nav-icon logout"><i class="bi bi-box-arrow-right"></i></span>
+                                    <span>Logout</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link voter-nav-link" href="{{ url_for('voter.dashboard') }}">
+                                    <span class="voter-nav-icon dashboard"><i class="bi bi-house-fill"></i></span>
+                                    <span data-translate="dashboard">Dashboard</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link voter-nav-link" href="{{ url_for('voter.elections') }}">
+                                    <span class="voter-nav-icon elections"><i class="bi bi-card-checklist"></i></span>
+                                    <span data-translate="elections">Elections</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link voter-nav-link" href="{{ url_for('verify.verify_receipt') }}">
+                                    <span class="voter-nav-icon verify"><i class="bi bi-patch-check-fill"></i></span>
+                                    <span data-translate="verify">Verify</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <span class="nav-link voter-id-badge">
+                                    <span class="voter-nav-icon user"><i class="bi bi-person-fill"></i></span>
+                                    <span>{{ current_user.voter_id }}</span>
+                                </span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link voter-nav-link" href="{{ url_for('auth.logout') }}">
+                                    <span class="voter-nav-icon logout"><i class="bi bi-box-arrow-right"></i></span>
+                                    <span data-translate="logout">Logout</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <!-- Voter Dropdown -->
+                        <li class="nav-item dropdown voter-dropdown">
+                            <a class="nav-link dropdown-toggle voter-btn" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-fill voter-icon me-1"></i><span data-translate="voter">Voter</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end voter-dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('verify.verify_receipt') }}">
+                                        <i class="bi bi-patch-check me-2"></i><span data-translate="verify_vote">Verify Vote</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('auth.register') }}">
+                                        <i class="bi bi-person-plus me-2"></i><span data-translate="register">Register</span>
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('auth.login') }}">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i><span data-translate="login">Login</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <!-- Admin Button -->
+                        <li class="nav-item">
+                            <a class="nav-link admin-btn" href="{{ url_for('admin.login') }}">
+                                <i class="bi bi-shield-lock-fill admin-icon me-1"></i>
+                                <span data-translate="admin">Admin</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    <!-- Language Toggle -->
+                    <li class="nav-item ms-lg-2">
+                        <button type="button" class="lang-toggle-btn" id="langToggleBtn" onclick="toggleLanguage()" title="Switch Language">
+                            <span class="lang-flag">🇳🇵</span><span class="lang-text">नेपाली</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    {% block footer %}
+    <footer class="footer mt-auto">
+        <div class="footer-content">
+            <div class="container">
+                <div class="footer-inner">
+                    <div class="footer-brand">
+                        <img src="{{ url_for('static', filename='images/Nepal-Flag.png') }}" alt="Nepal" class="footer-flag">
+                        <span class="footer-title" data-translate="site_title">Online Voting Nepal</span>
+                    </div>
+                    <div class="footer-badges">
+                        <span class="footer-badge"><i class="bi bi-shield-lock-fill"></i> <span data-translate="encrypted">Encrypted</span></span>
+                        <span class="footer-badge"><i class="bi bi-patch-check-fill"></i> <span data-translate="verified">Verified</span></span>
+                        <span class="footer-badge"><i class="bi bi-fingerprint"></i> <span data-translate="secure">Secure</span></span>
+                    </div>
+                    <div class="footer-copyright">
+                        &copy; {{ now().year if now is defined else "2024" }} <span data-translate="all_rights_reserved">All Rights Reserved</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Translation JS -->
+    <script src="{{ url_for('static', filename='js/translations.js') }}"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

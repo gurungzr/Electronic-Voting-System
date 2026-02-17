@@ -1,0 +1,711 @@
+{% extends "base.html" %}
+
+{% block title %}Vote Confirmed - Online Voting Nepal{% endblock %}
+{% block title_translate %}conf_title{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Light Blue Theme - Confirmation Page */
+    body {
+        background: linear-gradient(180deg, #e8f4f8 0%, #d1e9f0 50%, #b8dce8 100%);
+        min-height: 100vh;
+    }
+
+    /* Keep navbar dark for contrast */
+    .navbar {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%) !important;
+        box-shadow: 0 4px 20px rgba(30, 58, 95, 0.3);
+    }
+
+    /* Main container */
+    .confirmation-container {
+        min-height: calc(100vh - 180px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+
+    /* Success card */
+    .success-card {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 24px;
+        padding: 3rem 2.5rem;
+        text-align: center;
+        box-shadow: 0 4px 24px rgba(30, 58, 95, 0.1), 0 1px 3px rgba(30, 58, 95, 0.08);
+        max-width: 550px;
+        width: 100%;
+        border-top: 4px solid #10b981;
+    }
+
+    /* Success icon */
+    .success-icon-wrapper {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%);
+        border: 2px solid rgba(16, 185, 129, 0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.3); }
+        50% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
+    }
+    .success-icon-wrapper .check-icon {
+        font-size: 3rem;
+        color: #10b981;
+        font-weight: bold;
+        line-height: 1;
+    }
+
+    /* Text styles */
+    .success-title {
+        color: #059669;
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+    }
+    .success-subtitle {
+        color: #475569;
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+    .success-subtitle strong {
+        color: #1e3a5f;
+    }
+
+    /* Info notice */
+    .privacy-notice {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.08) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-top: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        text-align: left;
+    }
+    .privacy-notice i {
+        color: #3b82f6;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+    .privacy-notice-text strong {
+        color: #1e40af;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+    .privacy-notice-text span {
+        color: #3b82f6;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    /* Receipt card */
+    .receipt-card {
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(245, 158, 11, 0.08) 100%);
+        border: 1px solid rgba(234, 179, 8, 0.25);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        text-align: left;
+    }
+    .receipt-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #92400e;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+    .receipt-header i {
+        color: #d97706;
+        font-size: 1.3rem;
+    }
+    .receipt-item {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(234, 179, 8, 0.2);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    .receipt-label {
+        color: #92400e;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.5px;
+    }
+    .receipt-value {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .receipt-value code {
+        background: rgba(245, 158, 11, 0.15);
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #92400e;
+        flex-grow: 1;
+        letter-spacing: 0.5px;
+        word-break: break-all;
+    }
+    .btn-copy {
+        background: rgba(245, 158, 11, 0.15);
+        color: #92400e;
+        border: 1px solid rgba(234, 179, 8, 0.3);
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+    .btn-copy:hover {
+        background: rgba(245, 158, 11, 0.25);
+        border-color: rgba(234, 179, 8, 0.5);
+    }
+    .btn-copy.copied {
+        background: rgba(16, 185, 129, 0.15);
+        border-color: rgba(16, 185, 129, 0.3);
+        color: #059669;
+    }
+    .receipt-warning {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.08) 100%);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: 10px;
+        padding: 0.875rem;
+        margin-top: 1rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    .receipt-warning i {
+        color: #dc2626;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+    .receipt-warning span {
+        color: #991b1b;
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+    .receipt-warning a {
+        color: #dc2626;
+        font-weight: 600;
+        text-decoration: underline;
+    }
+    .receipt-warning a:hover {
+        color: #b91c1c;
+    }
+
+    /* Green timestamp item */
+    .receipt-item.timestamp {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%);
+        border-color: rgba(16, 185, 129, 0.2);
+    }
+    .receipt-item.timestamp .receipt-label {
+        color: #059669;
+    }
+    .receipt-item.timestamp code {
+        background: rgba(16, 185, 129, 0.12);
+        color: #047857;
+    }
+
+    /* Email section */
+    .email-section {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    .email-section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #059669;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+    }
+    .email-section-header i {
+        color: #10b981;
+    }
+    .email-input-wrapper {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .email-input {
+        flex: 1;
+        padding: 0.625rem 0.875rem;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        color: #1e3a5f;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .email-input::placeholder {
+        color: #94a3b8;
+    }
+    .email-input:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+    .btn-send-email {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.625rem 1rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        white-space: nowrap;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+    .btn-send-email:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+    }
+    .btn-send-email:disabled {
+        background: rgba(16, 185, 129, 0.4);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    .btn-send-email.sent {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
+    .email-status {
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        display: none;
+    }
+    .email-status.show {
+        display: block;
+    }
+    .email-status.success {
+        color: #059669;
+    }
+    .email-status.error {
+        color: #dc2626;
+    }
+    .email-disabled-notice {
+        color: #64748b;
+        font-size: 0.85rem;
+        font-style: italic;
+    }
+    .email-disabled-notice i {
+        margin-right: 0.25rem;
+    }
+
+    /* Divider */
+    .divider {
+        height: 1px;
+        background: rgba(30, 58, 95, 0.1);
+        margin: 1.5rem 0;
+    }
+
+    /* Thank you text */
+    .thank-you-text {
+        color: #64748b;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    /* Dashboard button */
+    .btn-dashboard {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    .btn-dashboard:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        color: white;
+    }
+    .btn-dashboard i {
+        transition: transform 0.3s ease;
+    }
+    .btn-dashboard:hover i {
+        transform: translateX(-3px);
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.8); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    .success-card {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    .success-icon-wrapper {
+        animation: scaleIn 0.5s ease-out 0.1s backwards;
+    }
+    .success-title {
+        animation: fadeInUp 0.5s ease-out 0.2s backwards;
+    }
+    .success-subtitle {
+        animation: fadeInUp 0.5s ease-out 0.25s backwards;
+    }
+    .privacy-notice {
+        animation: fadeInUp 0.5s ease-out 0.3s backwards;
+    }
+    .receipt-card {
+        animation: fadeInUp 0.5s ease-out 0.35s backwards;
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+        .success-card {
+            padding: 2rem 1.5rem;
+            margin: 0 1rem;
+        }
+        .success-icon-wrapper {
+            width: 80px;
+            height: 80px;
+        }
+        .success-icon-wrapper .check-icon {
+            font-size: 2.5rem;
+        }
+        .success-title {
+            font-size: 1.5rem;
+        }
+        .email-input-wrapper {
+            flex-direction: column;
+        }
+        .btn-send-email {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* ============================================
+       MINIMAL COMPACT FOOTER
+       ============================================ */
+    .voter-footer {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
+        padding: 0.875rem 0;
+        margin-top: auto;
+    }
+    .footer-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .footer-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .footer-flag {
+        height: 18px;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    }
+    .footer-title {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    .footer-center {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    .footer-link {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: color 0.2s;
+    }
+    .footer-link:hover {
+        color: white;
+    }
+    .footer-link i {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+    .footer-divider {
+        width: 1px;
+        height: 14px;
+        background: rgba(255, 255, 255, 0.2);
+    }
+    .footer-badges {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .footer-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.05);
+    }
+    .footer-badge i {
+        color: #10b981;
+        font-size: 0.7rem;
+    }
+    .footer-copyright {
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.7rem;
+    }
+
+    @media (max-width: 768px) {
+        .footer-inner {
+            flex-wrap: wrap;
+            justify-content: center;
+            text-align: center;
+        }
+        .footer-center { display: none; }
+        .footer-badges { order: 3; width: 100%; justify-content: center; margin-top: 0.5rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="confirmation-container">
+    <div class="success-card">
+        <div class="success-icon-wrapper">
+            <span class="check-icon">&#10003;</span>
+        </div>
+
+        <h2 class="success-title" data-translate="conf_success_title">Vote Successfully Cast!</h2>
+        <p class="success-subtitle"><span data-translate="conf_vote_for">Your vote for</span> <strong>{{ election.name }}</strong> <span data-translate="conf_has_been_recorded">has been recorded.</span></p>
+
+        <div class="privacy-notice">
+            <i class="bi bi-shield-check"></i>
+            <div class="privacy-notice-text">
+                <strong data-translate="conf_anonymous_title">Your vote is anonymous.</strong>
+                <span data-translate="conf_anonymous_desc">Your vote has been stored separately from your identity to ensure ballot secrecy.</span>
+            </div>
+        </div>
+
+        {% if receipts %}
+        <div class="receipt-card">
+            <div class="receipt-header">
+                <i class="bi bi-receipt"></i>
+                <span data-translate="conf_your_receipt">Your Vote Receipt</span>
+            </div>
+
+            <div class="receipt-item">
+                <div class="receipt-label" data-translate="conf_receipt_id_label">Receipt ID (Both FPTP & PR Ballots)</div>
+                <div class="receipt-value">
+                    <code id="vote-receipt">{{ receipts.receipt_id }}</code>
+                    <button class="btn-copy" onclick="copyReceipt('vote-receipt', this)" title="Copy to clipboard">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="receipt-item timestamp">
+                <div class="receipt-label" data-translate="conf_recorded_at">Recorded At</div>
+                <div class="receipt-value">
+                    <code>{{ receipts.timestamp }}</code>
+                </div>
+            </div>
+
+            <div class="receipt-warning">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span><strong data-translate="conf_save_receipt">Save this receipt now!</strong> <span data-translate="conf_receipt_warning_text">It will not be shown again. You can use it to verify both your votes were recorded at the</span> <a href="{{ url_for('verify.verify_receipt') }}" data-translate="conf_verification_page">verification page</a><span data-translate="conf_receipt_warning_end">.</span></span>
+            </div>
+
+            <!-- Email Receipt Section -->
+            <div class="email-section">
+                <div class="email-section-header">
+                    <i class="bi bi-envelope"></i>
+                    <span data-translate="conf_email_receipt">Email a copy of your receipt</span>
+                </div>
+                {% if email_enabled %}
+                <div class="email-input-wrapper">
+                    <input type="email" id="email-input" class="email-input" placeholder="Enter your email address" data-translate-placeholder="conf_email_placeholder" autocomplete="email">
+                    <button id="btn-send-email" class="btn-send-email" onclick="sendReceiptEmail()">
+                        <i class="bi bi-send"></i>
+                        <span data-translate="conf_send">Send</span>
+                    </button>
+                </div>
+                <div id="email-status" class="email-status"></div>
+                {% else %}
+                <p class="email-disabled-notice">
+                    <i class="bi bi-info-circle"></i>
+                    <span data-translate="conf_email_disabled">Email service is not configured. Please copy and save your receipt manually.</span>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="divider"></div>
+
+        <p class="thank-you-text">
+            <span data-translate="conf_thank_you">Thank you for participating in the democratic process.</span><br>
+            <span data-translate="conf_voice_matters">Your voice matters!</span>
+        </p>
+
+        <a href="{{ url_for('voter.dashboard') }}" class="btn-dashboard">
+            <i class="bi bi-house"></i>
+            <span data-translate="conf_return_dashboard">Return to Dashboard</span>
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+<footer class="voter-footer">
+    <div class="container">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <img src="{{ url_for('static', filename='images/Nepal-Flag.png') }}" alt="Nepal" class="footer-flag">
+                <span class="footer-title" data-translate="site_title">Online Voting Nepal</span>
+            </div>
+            <div class="footer-center">
+                <a href="{{ url_for('verify.verify_receipt') }}" class="footer-link"><i class="bi bi-patch-check"></i> <span data-translate="verify_vote">Verify Vote</span></a>
+                <span class="footer-divider"></span>
+                <span class="footer-link"><i class="bi bi-telephone"></i> <span data-translate="footer_helpline">Helpline: 1166</span></span>
+            </div>
+            <div class="footer-badges">
+                <span class="footer-badge"><i class="bi bi-shield-lock-fill"></i> <span data-translate="encrypted">Encrypted</span></span>
+                <span class="footer-badge"><i class="bi bi-patch-check-fill"></i> <span data-translate="verified">Verified</span></span>
+            </div>
+            <div class="footer-copyright">&copy; {{ now().year if now is defined else "2025" }} ECN</div>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyReceipt(elementId, button) {
+    const code = document.getElementById(elementId);
+    const text = code.textContent;
+
+    navigator.clipboard.writeText(text).then(function() {
+        // Show success state
+        button.classList.add('copied');
+        button.innerHTML = '<i class="bi bi-check"></i>';
+
+        // Reset after 2 seconds
+        setTimeout(function() {
+            button.classList.remove('copied');
+            button.innerHTML = '<i class="bi bi-clipboard"></i>';
+        }, 2000);
+    }).catch(function(err) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+
+        button.classList.add('copied');
+        button.innerHTML = '<i class="bi bi-check"></i>';
+        setTimeout(function() {
+            button.classList.remove('copied');
+            button.innerHTML = '<i class="bi bi-clipboard"></i>';
+        }, 2000);
+    });
+}
+
+function sendReceiptEmail() {
+    const emailInput = document.getElementById('email-input');
+    const sendBtn = document.getElementById('btn-send-email');
+    const statusDiv = document.getElementById('email-status');
+    const email = emailInput.value.trim();
+
+    if (!email) {
+        showStatus(translator.getTranslation('conf_email_required'), 'error');
+        return;
+    }
+
+    // Basic email validation
+    if (!email.includes('@') || !email.split('@')[1].includes('.')) {
+        showStatus(translator.getTranslation('conf_email_invalid'), 'error');
+        return;
+    }
+
+    // Disable button and show loading
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<i class="bi bi-hourglass-split"></i><span>' + translator.getTranslation('conf_sending') + '</span>';
+
+    // Get CSRF token
+    const csrfToken = document.querySelector('input[name="csrf_token"]')?.value ||
+                      document.querySelector('meta[name="csrf-token"]')?.content;
+
+    // Send request
+    fetch('{{ url_for("voter.send_receipt_to_email", election_id=election.election_id) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({ email: email })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showStatus(data.message, 'success');
+            sendBtn.classList.add('sent');
+            sendBtn.innerHTML = '<i class="bi bi-check-circle"></i><span>' + translator.getTranslation('conf_sent') + '</span>';
+            emailInput.disabled = true;
+        } else {
+            showStatus(data.message, 'error');
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="bi bi-send"></i><span>' + translator.getTranslation('conf_send') + '</span>';
+        }
+    })
+    .catch(error => {
+        showStatus(translator.getTranslation('conf_email_error'), 'error');
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i class="bi bi-send"></i><span>' + translator.getTranslation('conf_send') + '</span>';
+    });
+}
+
+function showStatus(message, type) {
+    const statusDiv = document.getElementById('email-status');
+    statusDiv.textContent = message;
+    statusDiv.className = 'email-status show ' + type;
+}
+</script>
+{% endblock %}

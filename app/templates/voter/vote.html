@@ -1,0 +1,778 @@
+{% extends "base.html" %}
+
+{% block title %}Vote - {{ election.name }} - Online Voting Nepal{% endblock %}
+{% block title_translate %}vote_page_title{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Light Blue Theme - Vote Page */
+    body {
+        background: linear-gradient(180deg, #e8f4f8 0%, #d1e9f0 50%, #b8dce8 100%);
+        min-height: 100vh;
+    }
+
+    /* Keep navbar dark for contrast */
+    .navbar {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%) !important;
+        box-shadow: 0 4px 20px rgba(30, 58, 95, 0.3);
+    }
+
+    /* Main voting card */
+    .voting-container {
+        padding: 2rem 0;
+    }
+    .voting-card {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(30, 58, 95, 0.1), 0 1px 3px rgba(30, 58, 95, 0.08);
+    }
+    .voting-header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        padding: 1.5rem 2rem;
+    }
+    .voting-header h4 {
+        color: white;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .voting-body {
+        padding: 2rem;
+    }
+
+    /* Info alerts */
+    .info-alert {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.08) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        color: #1e40af;
+        font-size: 0.9rem;
+    }
+    .info-alert i {
+        color: #3b82f6;
+    }
+    .info-alert strong {
+        color: #1e3a8a;
+    }
+
+    .token-alert {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(79, 70, 229, 0.08) 100%);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    .token-alert code {
+        background: rgba(99, 102, 241, 0.15);
+        color: #4f46e5;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+    }
+    .token-badge {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .election-desc {
+        color: #475569;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+    .election-meta {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(30, 58, 95, 0.1);
+    }
+    .election-meta span {
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+    .constituency-badge {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(79, 70, 229, 0.1) 100%);
+        color: #4f46e5;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    /* Ballot sections */
+    .ballot-section {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(30, 58, 95, 0.1);
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(30, 58, 95, 0.05);
+    }
+    .ballot-header {
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .ballot-header.fptp {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    }
+    .ballot-header.pr {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    .ballot-header h5 {
+        color: white;
+        font-weight: 600;
+        margin: 0;
+        font-size: 1rem;
+    }
+    .ballot-header i {
+        color: white;
+    }
+    .ballot-body {
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.5);
+    }
+    .ballot-body > p {
+        color: #64748b;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Candidate/Party cards */
+    .selection-card {
+        background: rgba(255, 255, 255, 0.95);
+        border: 2px solid rgba(30, 58, 95, 0.1);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .selection-card:hover {
+        border-color: rgba(30, 58, 95, 0.25);
+        background: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(30, 58, 95, 0.1);
+    }
+    .selection-card.candidate:has(.form-check-input:checked) {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+        border-color: #6366f1;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+    }
+    .selection-card.party:has(.form-check-input:checked) {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%);
+        border-color: #10b981;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+    }
+    .selection-card .form-check {
+        margin: 0;
+        padding: 0;
+    }
+    .selection-card .form-check-input {
+        width: 1.25rem;
+        height: 1.25rem;
+        margin-top: 0.15rem;
+        background-color: rgba(30, 58, 95, 0.05);
+        border-color: rgba(30, 58, 95, 0.2);
+    }
+    .selection-card .form-check-input:checked {
+        background-color: #6366f1;
+        border-color: #6366f1;
+    }
+    .selection-card.party .form-check-input:checked {
+        background-color: #10b981;
+        border-color: #10b981;
+    }
+    .selection-card .form-check-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        cursor: pointer;
+    }
+    .selection-card h5, .selection-card h6 {
+        color: #1e3a5f;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    .selection-card h5 {
+        font-size: 1rem;
+    }
+    .selection-card h6 {
+        font-size: 0.95rem;
+        margin: 0;
+    }
+    .party-badge {
+        background: rgba(30, 58, 95, 0.08);
+        color: #475569;
+        padding: 0.2rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+    }
+    .party-symbol {
+        font-size: 1.5rem;
+        color: #10b981;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    /* Warning alert */
+    .warning-alert {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.08) 100%);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        color: #92400e;
+        font-size: 0.9rem;
+    }
+    .warning-alert i {
+        color: #d97706;
+    }
+    .warning-alert strong {
+        color: #78350f;
+    }
+
+    /* Buttons */
+    .btn-back {
+        padding: 0.75rem 1.5rem;
+        border: 1px solid rgba(30, 58, 95, 0.2);
+        border-radius: 12px;
+        color: #475569;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.8);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn-back:hover {
+        background: white;
+        border-color: rgba(30, 58, 95, 0.3);
+        color: #1e3a5f;
+    }
+    .btn-submit {
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
+
+    /* Modal */
+    .modal-content {
+        background: white;
+        border: 1px solid rgba(30, 58, 95, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 25px 50px rgba(30, 58, 95, 0.2);
+    }
+    .modal-header {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%);
+        border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+        padding: 1.25rem 1.5rem;
+        border-radius: 20px 20px 0 0;
+    }
+    .modal-title {
+        color: #92400e;
+        font-weight: 600;
+    }
+    .modal-header .btn-close {
+        opacity: 0.5;
+    }
+    .modal-header .btn-close:hover {
+        opacity: 1;
+    }
+    .modal-body {
+        padding: 1.5rem;
+        color: #475569;
+    }
+    .modal-body p {
+        margin-bottom: 1rem;
+    }
+    .modal-body .text-muted {
+        color: #94a3b8 !important;
+    }
+    .vote-preview {
+        background: rgba(30, 58, 95, 0.03);
+        border: 1px solid rgba(30, 58, 95, 0.1);
+        border-radius: 12px;
+        padding: 0.875rem 1rem;
+        margin-bottom: 0.75rem;
+    }
+    .vote-preview strong {
+        color: #64748b;
+        font-size: 0.8rem;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+    .vote-preview .selection {
+        color: #6366f1;
+        font-weight: 600;
+    }
+    .vote-preview.pr .selection {
+        color: #059669;
+    }
+    .modal-footer {
+        border-top: 1px solid rgba(30, 58, 95, 0.1);
+        padding: 1rem 1.5rem;
+    }
+    .modal-footer .btn-secondary {
+        background: rgba(30, 58, 95, 0.05);
+        border: 1px solid rgba(30, 58, 95, 0.15);
+        color: #475569;
+    }
+    .modal-footer .btn-secondary:hover {
+        background: rgba(30, 58, 95, 0.1);
+        color: #1e3a5f;
+    }
+    .modal-footer .btn-primary {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .modal-footer .btn-primary:hover {
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Loading state */
+    .btn-loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.8;
+    }
+    .btn-loading .btn-text {
+        visibility: hidden;
+    }
+    .btn-loading .spinner {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+        to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .voting-card {
+        animation: fadeInUp 0.5s ease-out;
+    }
+    .ballot-section {
+        animation: fadeInUp 0.4s ease-out backwards;
+    }
+    .ballot-section:nth-of-type(1) { animation-delay: 0.1s; }
+    .ballot-section:nth-of-type(2) { animation-delay: 0.2s; }
+
+    /* Selection card animations */
+    .selection-card {
+        animation: fadeInUp 0.3s ease-out backwards;
+    }
+    .row.g-3 .col-md-6:nth-child(1) .selection-card { animation-delay: 0.1s; }
+    .row.g-3 .col-md-6:nth-child(2) .selection-card { animation-delay: 0.15s; }
+    .row.g-3 .col-md-6:nth-child(3) .selection-card { animation-delay: 0.2s; }
+    .row.g-3 .col-md-6:nth-child(4) .selection-card { animation-delay: 0.25s; }
+    .row.g-3 .col-md-4:nth-child(1) .selection-card { animation-delay: 0.1s; }
+    .row.g-3 .col-md-4:nth-child(2) .selection-card { animation-delay: 0.13s; }
+    .row.g-3 .col-md-4:nth-child(3) .selection-card { animation-delay: 0.16s; }
+    .row.g-3 .col-md-4:nth-child(4) .selection-card { animation-delay: 0.19s; }
+    .row.g-3 .col-md-4:nth-child(5) .selection-card { animation-delay: 0.22s; }
+    .row.g-3 .col-md-4:nth-child(6) .selection-card { animation-delay: 0.25s; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .voting-body {
+            padding: 1.25rem;
+        }
+        .ballot-body {
+            padding: 1rem;
+        }
+    }
+
+    /* ============================================
+       MINIMAL COMPACT FOOTER
+       ============================================ */
+    .voter-footer {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
+        padding: 0.875rem 0;
+        margin-top: auto;
+    }
+    .footer-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .footer-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .footer-flag {
+        height: 18px;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    }
+    .footer-title {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    .footer-center {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    .footer-link {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: color 0.2s;
+    }
+    .footer-link:hover {
+        color: white;
+    }
+    .footer-link i {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+    .footer-divider {
+        width: 1px;
+        height: 14px;
+        background: rgba(255, 255, 255, 0.2);
+    }
+    .footer-badges {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .footer-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.05);
+    }
+    .footer-badge i {
+        color: #10b981;
+        font-size: 0.7rem;
+    }
+    .footer-copyright {
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.7rem;
+    }
+
+    @media (max-width: 768px) {
+        .footer-inner {
+            flex-wrap: wrap;
+            justify-content: center;
+            text-align: center;
+        }
+        .footer-center { display: none; }
+        .footer-badges { order: 3; width: 100%; justify-content: center; margin-top: 0.5rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="voting-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="voting-card">
+                <div class="voting-header">
+                    <h4><i class="bi bi-check2-square"></i>{{ election.name }}</h4>
+                </div>
+                <div class="voting-body">
+                    <div class="info-alert">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong data-translate="vote_dual_ballot_title">Dual-Ballot Voting:</strong> <span data-translate="vote_dual_ballot_desc">You must cast both an FPTP vote (for a candidate in your constituency) and a PR vote (for a political party). Both votes are required to submit your ballot.</span>
+                    </div>
+
+                    <!-- Voting Token Display -->
+                    <div class="token-alert">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <i class="bi bi-key-fill me-2" style="color: #6366f1;"></i>
+                                <span style="color: #1e3a5f;"><strong data-translate="vote_your_token">Your Voting Token:</strong></span>
+                                <code class="ms-2 user-select-all">{{ voting_token[:16] }}...</code>
+                            </div>
+                            <span class="token-badge">
+                                <i class="bi bi-shield-check me-1"></i> <span data-translate="vote_token_secure">Secure</span>
+                            </span>
+                        </div>
+                        <small style="color: #64748b; display: block; margin-top: 0.5rem;" data-translate="vote_token_desc">
+                            This token ensures your vote is counted while keeping your identity anonymous.
+                        </small>
+                    </div>
+
+                    <p class="election-desc">{{ election.description }}</p>
+
+                    <div class="election-meta">
+                        <span><i class="bi bi-calendar me-1"></i> <span data-translate="vote_ends">Voting ends:</span> {{ election.end_date.strftime('%B %d, %Y at %H:%M') }}</span>
+                        <span class="constituency-badge"><i class="bi bi-geo-alt me-1"></i> {{ voter_constituency }}</span>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('voter.vote', election_id=election.election_id) }}" id="voteForm" autocomplete="off">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="token_id" value="{{ voting_token }}">
+
+                        <!-- FPTP Ballot -->
+                        <div class="ballot-section">
+                            <div class="ballot-header fptp">
+                                <i class="bi bi-person-check"></i>
+                                <h5><span data-translate="vote_fptp_ballot">FPTP Ballot -</span> {{ voter_constituency }} <span data-translate="vote_constituency">Constituency</span></h5>
+                            </div>
+                            <div class="ballot-body">
+                                <p data-translate="vote_fptp_instruction">Select ONE candidate from your constituency. The candidate with the most votes wins this seat.</p>
+                                <div class="row g-3">
+                                    {% for candidate in candidates %}
+                                    <div class="col-md-6">
+                                        <div class="selection-card candidate">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio"
+                                                       name="candidate_id" id="candidate_{{ candidate.candidate_id }}"
+                                                       value="{{ candidate.candidate_id }}" required>
+                                                <label class="form-check-label" for="candidate_{{ candidate.candidate_id }}">
+                                                    <div>
+                                                        <h5>{{ candidate.name }}</h5>
+                                                        <span class="party-badge">{{ candidate.party }}</span>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="col-12">
+                                        <div class="warning-alert">
+                                            <i class="bi bi-exclamation-triangle me-2"></i>
+                                            <span data-translate="vote_no_candidates">No candidates available for your constituency.</span>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PR Ballot -->
+                        <div class="ballot-section">
+                            <div class="ballot-header pr">
+                                <i class="bi bi-building"></i>
+                                <h5 data-translate="vote_pr_ballot">PR Ballot - Proportional Representation</h5>
+                            </div>
+                            <div class="ballot-body">
+                                <p><span data-translate="vote_pr_instruction">Select ONE political party.</span> {{ election.total_pr_seats }} <span data-translate="vote_pr_seats_info">seats will be distributed proportionally based on total vote percentages nationwide.</span></p>
+                                <div class="row g-3">
+                                    {% for party in election.parties %}
+                                    <div class="col-md-4">
+                                        <div class="selection-card party">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio"
+                                                       name="party_id" id="party_{{ party.party_id }}"
+                                                       value="{{ party.party_id }}" required>
+                                                <label class="form-check-label" for="party_{{ party.party_id }}">
+                                                    {% if party.symbol %}
+                                                    <i class="{{ party.symbol }} party-symbol me-2"></i>
+                                                    {% endif %}
+                                                    <h6>{{ party.name }}</h6>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="col-12">
+                                        <div class="warning-alert">
+                                            <i class="bi bi-exclamation-triangle me-2"></i>
+                                            <span data-translate="vote_no_parties">No parties available for this election.</span>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="warning-alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong data-translate="vote_confirm_warning_title">Confirm your choices:</strong> <span data-translate="vote_confirm_warning_desc">Once you submit your ballot, it cannot be changed or undone. Both FPTP and PR votes will be recorded anonymously.</span>
+                        </div>
+
+                        <div class="d-flex justify-content-between flex-wrap gap-3">
+                            <a href="{{ url_for('voter.dashboard') }}" class="btn-back">
+                                <i class="bi bi-arrow-left"></i> <span data-translate="vote_back_to_dashboard">Back to Dashboard</span>
+                            </a>
+                            <button type="button" class="btn-submit" data-bs-toggle="modal" data-bs-target="#confirmModal">
+                                <i class="bi bi-check2-circle"></i> <span data-translate="vote_submit_ballot">Submit Ballot</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i><span data-translate="vote_confirm_title">Confirm Your Ballot</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p data-translate="vote_confirm_question">Are you sure you want to submit your dual ballot?</p>
+                <p class="text-muted" data-translate="vote_confirm_undone">This action cannot be undone. Both votes will be recorded anonymously.</p>
+
+                <div class="vote-preview">
+                    <strong data-translate="vote_fptp_vote">FPTP Vote:</strong>
+                    <div id="selectedCandidate" class="selection" data-translate="vote_no_candidate_selected">No candidate selected</div>
+                </div>
+
+                <div class="vote-preview pr">
+                    <strong data-translate="vote_pr_vote">PR Vote:</strong>
+                    <div id="selectedParty" class="selection" data-translate="vote_no_party_selected">No party selected</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-translate="vote_cancel">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmVoteBtn">
+                    <span class="btn-text"><i class="bi bi-check2-circle me-2"></i><span data-translate="vote_confirm_ballot">Confirm Ballot</span></span>
+                    <span class="spinner" style="display: none;"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+<footer class="voter-footer">
+    <div class="container">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <img src="{{ url_for('static', filename='images/Nepal-Flag.png') }}" alt="Nepal" class="footer-flag">
+                <span class="footer-title" data-translate="site_title">Online Voting Nepal</span>
+            </div>
+            <div class="footer-center">
+                <a href="{{ url_for('verify.verify_receipt') }}" class="footer-link"><i class="bi bi-patch-check"></i> <span data-translate="verify_vote">Verify Vote</span></a>
+                <span class="footer-divider"></span>
+                <span class="footer-link"><i class="bi bi-telephone"></i> <span data-translate="footer_helpline">Helpline: 1166</span></span>
+            </div>
+            <div class="footer-badges">
+                <span class="footer-badge"><i class="bi bi-shield-lock-fill"></i> <span data-translate="encrypted">Encrypted</span></span>
+                <span class="footer-badge"><i class="bi bi-patch-check-fill"></i> <span data-translate="verified">Verified</span></span>
+            </div>
+            <div class="footer-copyright">&copy; {{ now().year if now is defined else "2025" }} ECN</div>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('voteForm');
+    const confirmBtn = document.getElementById('confirmVoteBtn');
+    const selectedCandidateDiv = document.getElementById('selectedCandidate');
+    const selectedPartyDiv = document.getElementById('selectedParty');
+
+    // Update selected candidate in modal
+    document.querySelectorAll('input[name="candidate_id"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            const label = document.querySelector('label[for="' + this.id + '"]');
+            const name = label.querySelector('h5').textContent;
+            const party = label.querySelector('.party-badge').textContent;
+            selectedCandidateDiv.innerHTML = name + ' (' + party + ')';
+            selectedCandidateDiv.removeAttribute('data-translate');
+        });
+    });
+
+    // Update selected party in modal
+    document.querySelectorAll('input[name="party_id"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            const label = document.querySelector('label[for="' + this.id + '"]');
+            const name = label.querySelector('h6').textContent;
+            selectedPartyDiv.innerHTML = name;
+            selectedPartyDiv.removeAttribute('data-translate');
+        });
+    });
+
+    // Validate before showing modal
+    document.querySelector('[data-bs-target="#confirmModal"]').addEventListener('click', function(e) {
+        const selectedCandidate = document.querySelector('input[name="candidate_id"]:checked');
+        const selectedParty = document.querySelector('input[name="party_id"]:checked');
+
+        if (!selectedCandidate) {
+            e.preventDefault();
+            alert(translator.getTranslation('vote_alert_select_candidate'));
+            return;
+        }
+        if (!selectedParty) {
+            e.preventDefault();
+            alert(translator.getTranslation('vote_alert_select_party'));
+            return;
+        }
+    });
+
+    // Submit form on confirm with loading state
+    confirmBtn.addEventListener('click', function() {
+        // Prevent double-click
+        if (confirmBtn.classList.contains('btn-loading')) {
+            return;
+        }
+
+        // Add loading state
+        confirmBtn.classList.add('btn-loading');
+        confirmBtn.querySelector('.spinner').style.display = 'block';
+
+        // Disable cancel button too
+        document.querySelector('.modal-footer .btn-secondary').disabled = true;
+
+        // Submit the form
+        form.submit();
+    });
+});
+</script>
+{% endblock %}

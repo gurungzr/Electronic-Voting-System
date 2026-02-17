@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block title %}Enter Decryption Shares - {{ election.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #252540 100%);
+        min-height: 100vh;
+    }
+    .navbar {
+        background: rgba(15, 15, 26, 0.95) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    footer {
+        background: rgba(15, 15, 26, 0.95) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    footer span {
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+    h2 { color: white; }
+    h2 i { color: #dc2626; }
+    .text-muted { color: rgba(255, 255, 255, 0.5) !important; }
+    code {
+        background: rgba(220, 38, 38, 0.15);
+        color: #fca5a5;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+    }
+    .alert-info {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        color: #93c5fd;
+    }
+    .alert-info h6 { color: #bfdbfe; }
+    .btn-outline-secondary {
+        color: rgba(255, 255, 255, 0.7);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    .btn-outline-secondary:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: white;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        border: none;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+    }
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    }
+    .form-control, .form-select {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: white;
+    }
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+    .form-control:focus, .form-select:focus {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+        color: white;
+    }
+    .form-select option {
+        background: #1a1a2e;
+        color: white;
+    }
+    .share-input-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+    }
+    .share-input {
+        font-family: 'Courier New', monospace;
+        letter-spacing: 1px;
+    }
+    .share-number {
+        background: #e94560;
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    .threshold-badge {
+        background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        border-radius: 20px;
+        padding: 8px 20px;
+    }
+    .remove-share-btn {
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+    .remove-share-btn:hover {
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h2><i class="bi bi-key-fill me-2"></i>Enter Decryption Shares</h2>
+            <h5 class="text-muted">{{ election.name }}</h5>
+            <p class="text-muted">Election ID: <code>{{ election.election_id }}</code></p>
+        </div>
+
+        <!-- Threshold Info -->
+        <div class="text-center mb-4">
+            <span class="threshold-badge text-white">
+                <i class="bi bi-shield-lock me-2"></i>
+                Minimum <strong>3 of 5</strong> shares required
+            </span>
+        </div>
+
+        <!-- Instructions -->
+        <div class="alert alert-info mb-4">
+            <h6><i class="bi bi-info-circle me-2"></i>Instructions</h6>
+            <p class="mb-0">
+                Enter at least 3 decryption shares from the election officials.
+                Each share must include the share number (1-5) and the share value.
+                The shares were distributed when the election was created.
+            </p>
+        </div>
+
+        <!-- Share Entry Form -->
+        <form method="POST" id="sharesForm" autocomplete="off">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div id="sharesContainer">
+                <!-- Share inputs will be added here -->
+                <div class="share-entry mb-3" data-share-index="0">
+                    <div class="share-input-card p-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="share-number me-3">1</div>
+                            <div class="flex-grow-1">
+                                <label class="text-white mb-1">Share Number</label>
+                                <select class="form-select form-select-sm share-number-select" name="share_index_0" required>
+                                    <option value="">Select share number...</option>
+                                    <option value="1">Share 1</option>
+                                    <option value="2">Share 2</option>
+                                    <option value="3">Share 3</option>
+                                    <option value="4">Share 4</option>
+                                    <option value="5">Share 5</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-white mb-1">Share Value</label>
+                            <input type="text" class="form-control share-input"
+                                   name="share_value_0"
+                                   placeholder="Enter share value (e.g., a1b2c3d4-e5f6g7h8-...)"
+                                   required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="share-entry mb-3" data-share-index="1">
+                    <div class="share-input-card p-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="share-number me-3">2</div>
+                            <div class="flex-grow-1">
+                                <label class="text-white mb-1">Share Number</label>
+                                <select class="form-select form-select-sm share-number-select" name="share_index_1" required>
+                                    <option value="">Select share number...</option>
+                                    <option value="1">Share 1</option>
+                                    <option value="2">Share 2</option>
+                                    <option value="3">Share 3</option>
+                                    <option value="4">Share 4</option>
+                                    <option value="5">Share 5</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-white mb-1">Share Value</label>
+                            <input type="text" class="form-control share-input"
+                                   name="share_value_1"
+                                   placeholder="Enter share value"
+                                   required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="share-entry mb-3" data-share-index="2">
+                    <div class="share-input-card p-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="share-number me-3">3</div>
+                            <div class="flex-grow-1">
+                                <label class="text-white mb-1">Share Number</label>
+                                <select class="form-select form-select-sm share-number-select" name="share_index_2" required>
+                                    <option value="">Select share number...</option>
+                                    <option value="1">Share 1</option>
+                                    <option value="2">Share 2</option>
+                                    <option value="3">Share 3</option>
+                                    <option value="4">Share 4</option>
+                                    <option value="5">Share 5</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-white mb-1">Share Value</label>
+                            <input type="text" class="form-control share-input"
+                                   name="share_value_2"
+                                   placeholder="Enter share value"
+                                   required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add More Shares Button -->
+            <div class="text-center mb-4">
+                <button type="button" class="btn btn-outline-secondary" id="addShareBtn">
+                    <i class="bi bi-plus-circle me-2"></i>Add Another Share (Optional)
+                </button>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('admin.view_election', election_id=election.election_id) }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Cancel
+                </a>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-unlock me-2"></i>Decrypt & View Results
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let shareCount = 3;
+    const maxShares = 5;
+
+    document.getElementById('addShareBtn').addEventListener('click', function() {
+        if (shareCount >= maxShares) {
+            alert('Maximum 5 shares can be entered.');
+            return;
+        }
+
+        const container = document.getElementById('sharesContainer');
+        const newEntry = document.createElement('div');
+        newEntry.className = 'share-entry mb-3';
+        newEntry.setAttribute('data-share-index', shareCount);
+
+        newEntry.innerHTML = `
+            <div class="share-input-card p-3">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="share-number me-3">${shareCount + 1}</div>
+                    <div class="flex-grow-1">
+                        <label class="text-white mb-1">Share Number</label>
+                        <select class="form-select form-select-sm share-number-select" name="share_index_${shareCount}">
+                            <option value="">Select share number...</option>
+                            <option value="1">Share 1</option>
+                            <option value="2">Share 2</option>
+                            <option value="3">Share 3</option>
+                            <option value="4">Share 4</option>
+                            <option value="5">Share 5</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-share-btn ms-2" onclick="removeShare(this)">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div>
+                    <label class="text-white mb-1">Share Value</label>
+                    <input type="text" class="form-control share-input"
+                           name="share_value_${shareCount}"
+                           placeholder="Enter share value">
+                </div>
+            </div>
+        `;
+
+        container.appendChild(newEntry);
+        shareCount++;
+
+        if (shareCount >= maxShares) {
+            this.disabled = true;
+        }
+    });
+
+    function removeShare(btn) {
+        const entry = btn.closest('.share-entry');
+        entry.remove();
+        shareCount--;
+        document.getElementById('addShareBtn').disabled = false;
+
+        // Renumber remaining shares
+        const entries = document.querySelectorAll('.share-entry');
+        entries.forEach((entry, index) => {
+            entry.querySelector('.share-number').textContent = index + 1;
+        });
+    }
+
+    // Form validation
+    document.getElementById('sharesForm').addEventListener('submit', function(e) {
+        const usedNumbers = new Set();
+        const selects = document.querySelectorAll('.share-number-select');
+        let valid = true;
+
+        selects.forEach(select => {
+            if (select.value) {
+                if (usedNumbers.has(select.value)) {
+                    alert('Each share number can only be used once. Please check for duplicates.');
+                    valid = false;
+                    return;
+                }
+                usedNumbers.add(select.value);
+            }
+        });
+
+        if (!valid) {
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}
